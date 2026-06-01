@@ -23,7 +23,13 @@ export default async function AdminProductosPage() {
   const products = await api("products?select=*&order=created_at.desc")
 
   const productIds = (products as any[]).map((p) => p.id)
-  const catIds = [...new Set((products as any[]).map((p) => p.categoria_id).filter(Boolean))] as number[]
+  const catIds = Array.from(
+    new Set(
+      (products as any[])
+        .map((p) => p.categoria_id)
+        .filter(Boolean)
+    )
+  ) as number[]
 
   const [allImages, catMap] = await Promise.all([
     productIds.length

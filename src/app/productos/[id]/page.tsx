@@ -41,7 +41,13 @@ export default async function ProductDetailPage({
     ? await (async () => {
         const r = await api(`products?select=*&categoria_id=eq.${product.categoria_id}&id=neq.${product.id}&limit=4&order=created_at.desc`)
         const ids = (r as any[]).map((x: any) => x.id)
-        const catIds = [...new Set((r as any[]).map((x: any) => x.categoria_id).filter(Boolean))] as number[]
+        const catIds = Array.from(
+          new Set(
+            (r as any[])
+              .map((x: any) => x.categoria_id)
+              .filter(Boolean)
+          )
+        ) as number[]
         const [rimg, rcats] = await Promise.all([
           ids.length ? api(`product_images?select=*&product_id=in.(${ids.join(",")})&order=sort_order.asc`) : Promise.resolve([]),
           catIds.length ? api(`categories?select=*&id=in.(${catIds.join(",")})`) : Promise.resolve([]),

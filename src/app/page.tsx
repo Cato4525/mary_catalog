@@ -61,7 +61,13 @@ export default async function HomePage({ searchParams }: Props) {
   ]) as any
 
   const productIds = (products as any[])?.map((p: any) => p.id) || []
-  const catIds = [...new Set((products as any[])?.map((p: any) => p.categoria_id).filter(Boolean))] as number[]
+  const catIds = Array.from(
+    new Set(
+      (products as any[])
+        .map((p: any) => p.categoria_id)
+        .filter(Boolean)
+    )
+  ) as number[]
 
   const [allImages, catMap] = await Promise.all([
     productIds.length
