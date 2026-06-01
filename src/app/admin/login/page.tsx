@@ -29,7 +29,8 @@ export default function LoginPage() {
     if (res.ok) {
       router.push("/admin")
     } else {
-      setError("Credenciales incorrectas")
+      const data = await res.json()
+      setError(data.error || "Credenciales incorrectas")
     }
   }
 

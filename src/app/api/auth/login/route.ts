@@ -1,18 +1,56 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
+import { supabase } from "@/lib/supabase"
 
 export async function POST(request: Request) {
   const { email, password } = await request.json()
 
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@maryleggings.com"
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123"
+  const adminEmail = process.env.ADMIN_EMAIL
 
-  if (email !== adminEmail || password !== adminPassword) {
-    return NextResponse.json({ error: "Credenciales incorrectas" }, { status: 401 })
+  if (!adminEmail) {
+    return NextResponse.json(
+      { error: "ADMIN_EMAIL no configurado" },
+      { status: 500 }
+    )
   }
 
-  const cookieStore = cookies()
-  const session = btoa(JSON.stringify({ email, time: Date.now() }))
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    console.error("Supabase login error:", error)
+
+    return NextResponse.json(
+      { error: error.message },
+      { status: 401 }
+    )
+  }
+
+  if (!data.user) {
+    return NextResponse.json(
+      { error: "Usuario no encontrado" },
+      { status: 401 }
+    )
+  }
+
+  if (data.user.email !== adminEmail) {
+    return NextResponse.json(
+      { error: "Acceso denegado" },
+      { status: 403 }
+    )
+  }
+
+  const cookieStore = await cookies()
+
+  const session = btoa(
+    JSON.stringify({
+      email: data.user.email,
+      time: Date.now(),
+    })
+  )
+
   cookieStore.set("admin_session", session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

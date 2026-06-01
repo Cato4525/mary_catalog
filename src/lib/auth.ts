@@ -1,6 +1,6 @@
 import { cookies } from "next/headers"
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@maryleggings.com"
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 
 export function getSession() {
   const cookieStore = cookies()

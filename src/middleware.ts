@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@maryleggings.com"
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
