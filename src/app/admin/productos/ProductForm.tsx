@@ -20,7 +20,7 @@ function compressImage(file: File): Promise<File> {
       resolve(file)
       return
     }
-    const img = new Image()
+    const img = document.createElement("img")
     const url = URL.createObjectURL(file)
     img.onload = () => {
       URL.revokeObjectURL(url)
