@@ -30,7 +30,8 @@ export default function CategoryFilter({ categories }: { categories: Category[] 
     <div className="flex flex-wrap items-center gap-2">
       <button
         onClick={() => handleFilter("")}
-        className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+        aria-pressed={current === ""}
+        className={`rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
           current === ""
             ? "bg-primary-600 text-white"
             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -42,7 +43,8 @@ export default function CategoryFilter({ categories }: { categories: Category[] 
         <button
           key={cat.id}
           onClick={() => handleFilter(String(cat.id))}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+          aria-pressed={current === String(cat.id)}
+          className={`rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
             current === String(cat.id)
               ? "bg-primary-600 text-white"
               : "bg-gray-100 text-gray-600 hover:bg-gray-200"

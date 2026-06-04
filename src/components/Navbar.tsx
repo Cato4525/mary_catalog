@@ -45,11 +45,15 @@ export default function Navbar() {
           <Link href="/" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
             Catálogo
           </Link>
+          <Link href="/#contacto" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+            Contacto
+          </Link>
         </div>
         <button
-          className="sm:hidden p-2"
+          className="sm:hidden p-3"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Menú"
+          aria-expanded={menuOpen}
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {menuOpen ? (
@@ -65,6 +69,9 @@ export default function Navbar() {
           <div className="flex flex-col gap-2">
             <Link href="/" className="text-sm text-gray-600 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
               Catálogo
+            </Link>
+            <Link href="/#contacto" className="text-sm text-gray-600 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
+              Contacto
             </Link>
           </div>
         </div>

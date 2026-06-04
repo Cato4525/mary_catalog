@@ -2,21 +2,25 @@
 
 import type { Category } from "@/lib/types"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useRef } from "react"
 
 export default function AdminProductSearch({ categories }: { categories: Category[] }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const timer = useRef<ReturnType<typeof setTimeout>>()
 
   const handleSearch = useCallback(
     (term: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (term) {
-        params.set("q", term)
-      } else {
-        params.delete("q")
-      }
-      router.push(`/admin/productos?${params.toString()}`)
+      clearTimeout(timer.current)
+      timer.current = setTimeout(() => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (term) {
+          params.set("q", term)
+        } else {
+          params.delete("q")
+        }
+        router.push(`/admin/productos?${params.toString()}`)
+      }, 300)
     },
     [router, searchParams]
   )
@@ -48,7 +52,8 @@ export default function AdminProductSearch({ categories }: { categories: Categor
           placeholder="Buscar por código o nombre..."
           defaultValue={searchParams.get("q") || ""}
           onChange={(e) => handleSearch(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
+          aria-label="Buscar productos por código o nombre"
+          className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
         />
       </div>
       <select

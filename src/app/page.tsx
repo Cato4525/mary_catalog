@@ -131,7 +131,7 @@ export default async function HomePage({ searchParams }: Props) {
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            <nav aria-label="Paginación" className="mt-8 flex flex-wrap items-center justify-center gap-2">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <a
                   key={p}
@@ -140,7 +140,8 @@ export default async function HomePage({ searchParams }: Props) {
                     ...(categoria && { categoria }),
                     page: String(p),
                   }).toString()}`}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                  aria-current={p === currentPage ? "page" : undefined}
+                  className={`flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     p === currentPage
                       ? "bg-primary-600 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -149,7 +150,7 @@ export default async function HomePage({ searchParams }: Props) {
                   {p}
                 </a>
               ))}
-            </div>
+            </nav>
           )}
         </>
       ) : (
@@ -163,7 +164,7 @@ export default async function HomePage({ searchParams }: Props) {
       )}
 
       {store && (store.contact_email || store.contact_phone || store.address) && (
-        <div className="mt-16 border-t border-gray-200 pt-8">
+        <div id="contacto" className="mt-16 border-t border-gray-200 pt-8">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">Contacto</h2>
           <div className="space-y-2 text-sm text-gray-500">
             {store.contact_email && (

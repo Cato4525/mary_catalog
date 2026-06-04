@@ -7,6 +7,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -19,18 +20,25 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setLoading(true)
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    })
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
 
-    if (res.ok) {
-      router.push("/admin")
-    } else {
-      const data = await res.json()
-      setError(data.error || "Credenciales incorrectas")
+      if (res.ok) {
+        router.push("/admin")
+      } else {
+        const data = await res.json()
+        setError(data.error || "Credenciales incorrectas")
+      }
+    } catch {
+      setError("Error de conexión")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -64,9 +72,10 @@ export default function LoginPage() {
           )}
           <button
             type="submit"
-            className="w-full rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+            disabled={loading}
+            className="w-full rounded-lg bg-primary-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Ingresar
+            {loading ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
       </div>

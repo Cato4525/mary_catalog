@@ -273,12 +273,12 @@ export default function ProductForm({ product, categories }: Props) {
                     unoptimized
                   />
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center gap-0.5 rounded-lg bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="absolute inset-0 flex items-center justify-center gap-1 rounded-lg bg-black/40">
                   {i > 0 && (
                     <button
                       type="button"
                       onClick={() => moveImage(item.id, -1)}
-                      className="rounded bg-white/90 p-1 text-gray-700 hover:bg-white"
+                      className="rounded bg-white/90 p-1.5 text-gray-700 hover:bg-white"
                       title="Mover izquierda"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,7 +290,7 @@ export default function ProductForm({ product, categories }: Props) {
                     <button
                       type="button"
                       onClick={() => moveImage(item.id, 1)}
-                      className="rounded bg-white/90 p-1 text-gray-700 hover:bg-white"
+                      className="rounded bg-white/90 p-1.5 text-gray-700 hover:bg-white"
                       title="Mover derecha"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@ export default function ProductForm({ product, categories }: Props) {
                   <button
                     type="button"
                     onClick={() => removeImage(item.id)}
-                    className="rounded bg-red-500/90 p-1 text-white hover:bg-red-600"
+                    className="rounded bg-red-500/90 p-1.5 text-white hover:bg-red-600"
                     title="Eliminar"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,12 +310,12 @@ export default function ProductForm({ product, categories }: Props) {
                   </button>
                 </div>
                 {i === 0 && (
-                  <span className="absolute -right-2 -top-2 rounded-full bg-primary-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
+                  <span className="absolute right-0 top-0 rounded-bl-lg bg-primary-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
                     1°
                   </span>
                 )}
                 {item.existing && (
-                  <span className="absolute -left-2 -top-2 rounded-full bg-blue-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
+                  <span className="absolute left-0 top-0 rounded-br-lg bg-blue-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
                     OK
                   </span>
                 )}
@@ -353,14 +353,14 @@ export default function ProductForm({ product, categories }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
+          className="rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Guardando..." : product ? "Guardar Cambios" : "Crear Producto"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/admin/productos")}
-          className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="rounded-lg bg-gray-100 px-6 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
           Cancelar
         </button>

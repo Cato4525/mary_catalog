@@ -16,13 +16,21 @@ export default function SettingsForm({ settings }: Props) {
   const [success, setSuccess] = useState(false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState(settings?.logo_url || "")
+  const [removeLogo, setRemoveLogo] = useState(false)
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       setLogoFile(file)
       setLogoPreview(URL.createObjectURL(file))
+      setRemoveLogo(false)
     }
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoFile(null)
+    setLogoPreview("")
+    setRemoveLogo(true)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -38,20 +46,20 @@ export default function SettingsForm({ settings }: Props) {
       contact_email: (form.contact_email as HTMLInputElement).value,
       contact_phone: (form.contact_phone as HTMLInputElement).value,
       address: (form.address as HTMLTextAreaElement).value,
-      logo_url: settings?.logo_url || "",
+      logo_url: removeLogo ? "" : settings?.logo_url || "",
     }
 
     try {
       if (logoFile) {
         const formData = new FormData()
-        formData.append("file", logoFile)
+        formData.append("files", logoFile)
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         })
         if (!uploadRes.ok) throw new Error("Error al subir logo")
-        const { url } = await uploadRes.json()
-        data.logo_url = url
+        const { urls } = await uploadRes.json()
+        data.logo_url = urls[0]
       }
 
       const res = await fetch("/api/settings", {
@@ -103,15 +111,24 @@ export default function SettingsForm({ settings }: Props) {
           className="w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-primary-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-primary-700 hover:file:bg-primary-100"
         />
         {logoPreview && (
-          <div className="mt-3 relative h-20 w-20 overflow-hidden rounded-lg border border-gray-200">
-            <Image
-              src={logoPreview}
-              alt="Logo preview"
-              fill
-              className="object-contain"
-              sizes="80px"
-              unoptimized
-            />
+          <div className="mt-3 flex items-start gap-3">
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-gray-200">
+              <Image
+                src={logoPreview}
+                alt="Logo preview"
+                fill
+                className="object-contain"
+                sizes="80px"
+                unoptimized
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleRemoveLogo}
+              className="mt-1 rounded-lg bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100"
+            >
+              Eliminar logo
+            </button>
           </div>
         )}
       </div>
@@ -156,7 +173,7 @@ export default function SettingsForm({ settings }: Props) {
       <button
         type="submit"
         disabled={saving}
-        className="rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
+        className="rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {saving ? "Guardando..." : "Guardar Cambios"}
       </button>
