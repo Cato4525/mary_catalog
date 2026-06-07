@@ -33,4 +33,5 @@ export interface StoreSettings {
   contact_phone: string
   address: string
   logo_url: string
+  whatsapp: string
 }

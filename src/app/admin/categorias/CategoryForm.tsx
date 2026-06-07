@@ -10,7 +10,7 @@ function SubmitButton({ editing }: { editing: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
+      className="rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md active:scale-[0.97] disabled:opacity-50"
     >
       {pending ? "Guardando..." : editing ? "Guardar Cambios" : "Crear Categoría"}
     </button>
@@ -58,7 +58,7 @@ export default function CategoryForm({ category }: Props) {
         <button
           type="button"
           onClick={() => router.push("/admin/categorias")}
-          className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="rounded-lg bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97]"
         >
           Cancelar
         </button>

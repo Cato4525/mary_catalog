@@ -1,28 +1,25 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useTransition, useRef } from "react"
+import { useCallback, useRef } from "react"
 
 export default function SearchBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [, startTransition] = useTransition()
   const timer = useRef<ReturnType<typeof setTimeout>>()
 
   const handleSearch = useCallback(
     (term: string) => {
       clearTimeout(timer.current)
       timer.current = setTimeout(() => {
-        startTransition(() => {
-          const params = new URLSearchParams(searchParams.toString())
-          if (term) {
-            params.set("q", term)
-          } else {
-            params.delete("q")
-          }
-          params.delete("page")
-          router.push(`/?${params.toString()}`)
-        })
+        const params = new URLSearchParams(searchParams.toString())
+        if (term) {
+          params.set("q", term)
+        } else {
+          params.delete("q")
+        }
+        params.delete("page")
+        router.push(`/?${params.toString()}`)
       }, 300)
     },
     [router, searchParams]

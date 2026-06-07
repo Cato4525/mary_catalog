@@ -1,9 +1,10 @@
-import { supabase } from "@/lib/supabase"
+import { getSession } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
 import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 
 export async function GET() {
+  const { supabase } = await import("@/lib/supabase")
   const { data } = await supabase
     .from("store_settings")
     .select("*")
@@ -15,8 +16,13 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
+    const session = getSession()
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const body = await request.json()
-    const { store_name, store_description, contact_email, contact_phone, address, logo_url } = body
+    const { store_name, store_description, contact_email, contact_phone, address, logo_url, whatsapp } = body
 
     const { data, error } = await supabaseAdmin
       .from("store_settings")
@@ -27,6 +33,7 @@ export async function PUT(request: Request) {
         contact_phone: contact_phone || "",
         address: address || "",
         logo_url: logo_url || "",
+        whatsapp: whatsapp || "",
       })
       .eq("id", 1)
       .select()

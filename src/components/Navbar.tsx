@@ -1,24 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
-import type { StoreSettings } from "@/lib/types"
+import { useSettings } from "@/hooks/useSettings"
 
 export default function Navbar() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [settings, setSettings] = useState<StoreSettings | null>(null)
+  const settings = useSettings()
 
   if (pathname.startsWith("/admin")) return null
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((data) => setSettings(data))
-      .catch(() => {})
-  }, [])
 
   const storeName = settings?.store_name || "Mary Leggings"
   const logoUrl = settings?.logo_url
@@ -42,10 +35,10 @@ export default function Navbar() {
           </span>
         </Link>
         <div className="hidden items-center gap-4 sm:flex">
-          <Link href="/" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+          <Link href="/" className="rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-all hover:bg-primary-100 active:scale-[0.97]">
             Catálogo
           </Link>
-          <Link href="/#contacto" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+          <Link href="/#contacto" className="rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-all hover:bg-primary-100 active:scale-[0.97]">
             Contacto
           </Link>
         </div>
@@ -67,10 +60,10 @@ export default function Navbar() {
       {menuOpen && (
         <div className="border-t border-gray-100 px-4 py-3 sm:hidden">
           <div className="flex flex-col gap-2">
-            <Link href="/" className="text-sm text-gray-600 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
+            <Link href="/" className="rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-all hover:bg-primary-100" onClick={() => setMenuOpen(false)}>
               Catálogo
             </Link>
-            <Link href="/#contacto" className="text-sm text-gray-600 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
+            <Link href="/#contacto" className="rounded-lg bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 transition-all hover:bg-primary-100" onClick={() => setMenuOpen(false)}>
               Contacto
             </Link>
           </div>

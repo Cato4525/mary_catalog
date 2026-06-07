@@ -278,7 +278,7 @@ export default function ProductForm({ product, categories }: Props) {
                     <button
                       type="button"
                       onClick={() => moveImage(item.id, -1)}
-                      className="rounded bg-white/90 p-1.5 text-gray-700 hover:bg-white"
+                      className="rounded bg-white/90 p-1.5 text-gray-700 shadow-sm transition-all hover:bg-white active:scale-[0.9]"
                       title="Mover izquierda"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,7 +290,7 @@ export default function ProductForm({ product, categories }: Props) {
                     <button
                       type="button"
                       onClick={() => moveImage(item.id, 1)}
-                      className="rounded bg-white/90 p-1.5 text-gray-700 hover:bg-white"
+                      className="rounded bg-white/90 p-1.5 text-gray-700 shadow-sm transition-all hover:bg-white active:scale-[0.9]"
                       title="Mover derecha"
                     >
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,7 +301,7 @@ export default function ProductForm({ product, categories }: Props) {
                   <button
                     type="button"
                     onClick={() => removeImage(item.id)}
-                    className="rounded bg-red-500/90 p-1.5 text-white hover:bg-red-600"
+                    className="rounded bg-red-500/90 p-1.5 text-white shadow-sm transition-all hover:bg-red-600 active:scale-[0.9]"
                     title="Eliminar"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,7 +324,7 @@ export default function ProductForm({ product, categories }: Props) {
           </div>
         )}
 
-        <label className="relative inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 transition-colors hover:border-primary-400 hover:text-primary-600">
+        <label className="relative inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 shadow-sm transition-all hover:border-primary-400 hover:text-primary-600 active:scale-[0.98]">
           <input
             ref={fileRef}
             type="file"
@@ -353,14 +353,14 @@ export default function ProductForm({ product, categories }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Guardando..." : product ? "Guardar Cambios" : "Crear Producto"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/admin/productos")}
-          className="rounded-lg bg-gray-100 px-6 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+          className="rounded-lg bg-gray-100 px-6 py-3 text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97]"
         >
           Cancelar
         </button>

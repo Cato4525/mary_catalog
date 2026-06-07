@@ -28,7 +28,7 @@ export default function DeleteProductButton({ productId }: { productId: number }
       type="button"
       disabled={deleting}
       onClick={handleDelete}
-      className="rounded-lg bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+      className="rounded-lg bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-100 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
     >
       {deleting ? "Eliminando..." : "Eliminar"}
     </button>

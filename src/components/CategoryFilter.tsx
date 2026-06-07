@@ -2,26 +2,23 @@
 
 import type { Category } from "@/lib/types"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useTransition } from "react"
+import { useCallback } from "react"
 
 export default function CategoryFilter({ categories }: { categories: Category[] }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const current = searchParams.get("categoria") || ""
-  const [, startTransition] = useTransition()
 
   const handleFilter = useCallback(
     (value: string) => {
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (value) {
-          params.set("categoria", value)
-        } else {
-          params.delete("categoria")
-        }
-        params.delete("page")
-        router.push(`/?${params.toString()}`)
-      })
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) {
+        params.set("categoria", value)
+      } else {
+        params.delete("categoria")
+      }
+      params.delete("page")
+      router.push(`/?${params.toString()}`)
     },
     [router, searchParams]
   )
@@ -31,10 +28,10 @@ export default function CategoryFilter({ categories }: { categories: Category[] 
       <button
         onClick={() => handleFilter("")}
         aria-pressed={current === ""}
-        className={`rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
+        className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-all ${
           current === ""
-            ? "bg-primary-600 text-white"
-            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            ? "border-primary-600 bg-primary-600 text-white shadow-sm"
+            : "border-transparent bg-gray-100 text-gray-600 hover:border-primary-400 hover:bg-gray-200 active:scale-[0.97]"
         }`}
       >
         Todas
@@ -44,10 +41,10 @@ export default function CategoryFilter({ categories }: { categories: Category[] 
           key={cat.id}
           onClick={() => handleFilter(String(cat.id))}
           aria-pressed={current === String(cat.id)}
-          className={`rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
+          className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-all ${
             current === String(cat.id)
-              ? "bg-primary-600 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "border-primary-600 bg-primary-600 text-white shadow-sm"
+              : "border-transparent bg-gray-100 text-gray-600 hover:border-primary-400 hover:bg-gray-200 active:scale-[0.97]"
           }`}
         >
           {cat.nombre}
