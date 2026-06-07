@@ -1,10 +1,13 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import { useSettings } from "@/hooks/useSettings"
 
 export default function WhatsAppButton() {
+  const pathname = usePathname()
   const settings = useSettings()
 
+  if (pathname.startsWith("/admin")) return null
   if (!settings?.whatsapp) return null
 
   return (
