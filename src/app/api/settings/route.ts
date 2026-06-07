@@ -1,10 +1,9 @@
 import { getSession } from "@/lib/auth"
-import { supabaseAdmin } from "@/lib/supabase"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
 import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 
 export async function GET() {
-  const { supabase } = await import("@/lib/supabase")
   const { data } = await supabase
     .from("store_settings")
     .select("*")
