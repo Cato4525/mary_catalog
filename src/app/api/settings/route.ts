@@ -4,16 +4,23 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 
 export async function GET() {
-  const { data } = await supabase
-    .from("store_settings")
-    .select("*")
-    .eq("id", 1)
-    .single()
+  console.log("[settings] GET /api/settings called")
+  try {
+    const { data } = await supabase
+      .from("store_settings")
+      .select("*")
+      .eq("id", 1)
+      .single()
 
-  return NextResponse.json(data || {})
+    console.log("[settings] GET success:", data?.id)
+    return NextResponse.json(data || {})
+  } catch (err) {
+    console.error("[settings] GET error:", err)
+    return NextResponse.json({ error: "Error al obtener ajustes" }, { status: 500 })
+  }
 }
 
-export async function PUT(request: Request) {
+export async function POST(request: Request) {
   try {
     const session = getSession()
     if (!session) {
