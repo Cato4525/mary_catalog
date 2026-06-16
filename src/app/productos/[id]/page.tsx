@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import ProductGallery from "./ProductGallery"
+import ProductWhatsAppButton from "@/components/ProductWhatsAppButton"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -22,7 +23,7 @@ export default async function ProductDetailPage({
 }) {
   const productId = Number(params.id)
 
-  const [products, productImages, category] = await Promise.all([
+  const [products, productImages, category, settingsArr] = await Promise.all([
     api(`products?select=*&id=eq.${productId}`),
     api(`product_images?select=*&product_id=eq.${productId}&order=sort_order.asc`),
     (async () => {
@@ -32,7 +33,9 @@ export default async function ProductDetailPage({
       const c = await api(`categories?select=*&id=eq.${catId}`)
       return (c as any[])?.[0] || null
     })(),
+    api("store_settings?id=eq.1&select=*"),
   ])
+  const settings = (settingsArr as any[])?.[0] || null
 
   const product = (products as any[])?.[0]
   if (!product) notFound()
@@ -121,6 +124,15 @@ export default async function ProductDetailPage({
             <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
               {p.descripcion}
             </p>
+          )}
+
+          {settings?.whatsapp && images.length > 0 && (
+            <ProductWhatsAppButton
+              whatsapp={settings.whatsapp}
+              codigo={p.codigo}
+              nombre={p.nombre}
+              imagenUrl={images[0]}
+            />
           )}
         </div>
       </div>
