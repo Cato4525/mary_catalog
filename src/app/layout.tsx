@@ -3,6 +3,8 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/Navbar"
 import WhatsAppButton from "@/components/WhatsAppButton"
+import FloatingCartButton from "@/components/FloatingCartButton"
+import { CartProvider } from "@/context/CartContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -19,12 +21,15 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <WhatsAppButton />
-        <footer className="border-t border-gray-200 py-6 text-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Mary Leggings. Todos los derechos reservados.</p>
-        </footer>
+        <CartProvider>
+          <Navbar />
+          <main className="min-h-screen">{children}</main>
+          <WhatsAppButton />
+          <FloatingCartButton />
+          <footer className="border-t border-gray-200 py-6 text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} Mary Leggings. Todos los derechos reservados.</p>
+          </footer>
+        </CartProvider>
       </body>
     </html>
   )

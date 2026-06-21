@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import ProductGallery from "./ProductGallery"
 import ProductWhatsAppButton from "@/components/ProductWhatsAppButton"
+import AddToCartButton from "@/components/AddToCartButton"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -125,6 +126,17 @@ export default async function ProductDetailPage({
               {p.descripcion}
             </p>
           )}
+
+          <AddToCartButton
+            product={{
+              id: p.id,
+              codigo: p.codigo,
+              nombre: p.nombre,
+              color: p.color,
+              categoria: p.categories?.nombre || "",
+              imagen_url: images[0] || "",
+            }}
+          />
 
           {settings?.whatsapp && images.length > 0 && (
             <ProductWhatsAppButton
