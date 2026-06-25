@@ -39,11 +39,11 @@ export default async function ProductDetailPage({
   const settings = (settingsArr as any[])?.[0] || null
 
   const product = (products as any[])?.[0]
-  if (!product) notFound()
+  if (!product || product.disponible === false) notFound()
 
   const { data: related } = product.categoria_id
     ? await (async () => {
-        const r = await api(`products?select=*&categoria_id=eq.${product.categoria_id}&id=neq.${product.id}&limit=4&order=created_at.desc`)
+        const r = await api(`products?select=*&categoria_id=eq.${product.categoria_id}&id=neq.${product.id}&disponible=eq.true&limit=4&order=created_at.desc`)
         const ids = (r as any[]).map((x: any) => x.id)
         const catIds = Array.from(
           new Set(

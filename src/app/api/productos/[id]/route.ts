@@ -30,9 +30,18 @@ export async function PATCH(
       )
     }
 
+    const disponible = formData.get("disponible")
+    const updateData: Record<string, any> = { codigo, nombre, color, descripcion, categoria_id }
+    if (disponible === "true") {
+      updateData.disponible = true
+      updateData.fecha_activacion = new Date().toISOString()
+    } else if (disponible === "false") {
+      updateData.disponible = false
+    }
+
     const { data: product, error: productError } = await supabaseAdmin
       .from("products")
-      .update({ codigo, nombre, color, descripcion, categoria_id })
+      .update(updateData)
       .eq("id", productId)
       .select()
       .single()

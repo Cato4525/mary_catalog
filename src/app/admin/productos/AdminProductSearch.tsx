@@ -49,10 +49,10 @@ export default function AdminProductSearch({ categories }: { categories: Categor
         </svg>
         <input
           type="text"
-          placeholder="Buscar por código o nombre..."
+          placeholder="Buscar por código, nombre o color..."
           defaultValue={searchParams.get("q") || ""}
           onChange={(e) => handleSearch(e.target.value)}
-          aria-label="Buscar productos por código o nombre"
+          aria-label="Buscar productos por código, nombre o color"
           className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
         />
       </div>

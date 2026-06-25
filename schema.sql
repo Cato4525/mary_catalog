@@ -18,6 +18,8 @@ create table if not exists public.products (
   color text not null default '',
   categoria_id bigint references public.categories(id) on delete set null,
   imagen_url text not null default '',
+  disponible boolean not null default true,
+  fecha_activacion timestamptz default now(),
   created_at timestamptz default now()
 );
 

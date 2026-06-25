@@ -20,6 +20,8 @@ export interface Product {
   color: string
   categoria_id: number | null
   imagen_url: string
+  disponible: boolean
+  fecha_activacion: string | null
   created_at: string
   categories?: Category | null
   images?: ProductImage[]

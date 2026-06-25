@@ -2,12 +2,13 @@ import type { Product, StoreSettings } from "@/lib/types"
 import ProductCard from "@/components/ProductCard"
 import SearchBar from "@/components/SearchBar"
 import CategoryFilter from "@/components/CategoryFilter"
+import ColorFilter from "@/components/ColorFilter"
 import Image from "next/image"
 
 export const dynamic = "force-dynamic"
 
 interface Props {
-  searchParams: { q?: string; categoria?: string; page?: string }
+  searchParams: { q?: string; categoria?: string; color?: string; page?: string }
 }
 
 const PAGE_SIZE = 12
@@ -25,7 +26,7 @@ async function api(url: string) {
 }
 
 export default async function HomePage({ searchParams }: Props) {
-  const { q, categoria, page } = searchParams
+  const { q, categoria, color, page } = searchParams
   const currentPage = Number(page) || 1
 
   const [settingsArr] = await Promise.all([api("store_settings?id=eq.1&select=*")])
@@ -33,11 +34,15 @@ export default async function HomePage({ searchParams }: Props) {
 
   let url = "products?select=*&order=created_at.desc"
   const filters: string[] = []
+  filters.push("disponible=eq.true")
   if (q) {
-    filters.push(`or=(codigo.ilike.*${q}*,nombre.ilike.*${q}*)`)
+    filters.push(`or=(codigo.ilike.*${q}*,nombre.ilike.*${q}*,color.ilike.*${q}*)`)
   }
   if (categoria) {
     filters.push(`categoria_id=eq.${categoria}`)
+  }
+  if (color) {
+    filters.push(`color=ilike.*${color}*`)
   }
   if (filters.length) url += "&" + filters.join("&")
 
@@ -45,7 +50,7 @@ export default async function HomePage({ searchParams }: Props) {
   const to = from + PAGE_SIZE - 1
   url += `&offset=${from}&limit=${PAGE_SIZE}`
 
-  const [{ products, count }, categories] = await Promise.all([
+  const [{ products, count }, categories, distinctColors] = await Promise.all([
     (async () => {
       const countUrl = `${supabaseUrl}/rest/v1/products?select=count&${filters.join("&")}`.replace(/&offset=.*$/, "").replace(/&limit=.*$/, "")
       const [data, countRes] = await Promise.all([
@@ -60,6 +65,7 @@ export default async function HomePage({ searchParams }: Props) {
       return { products: data, count: total }
     })(),
     api("categories?select=*&order=nombre.asc"),
+    api("products?select=color&disponible=eq.true&order=color.asc"),
   ]) as any
 
   const productIds = (products as any[])?.map((p: any) => p.id) || []
@@ -95,6 +101,10 @@ export default async function HomePage({ searchParams }: Props) {
     categories: catById[p.categoria_id] || null,
   }))
 
+  const uniqueColors = Array.from(
+    new Set((distinctColors as any[])?.map((p: any) => p.color).filter(Boolean))
+  ) as string[]
+
   const totalPages = count ? Math.ceil(count / PAGE_SIZE) : 1
   const store = settings as StoreSettings | null
 
@@ -122,6 +132,10 @@ export default async function HomePage({ searchParams }: Props) {
       <div className="mb-6 space-y-4">
         <SearchBar />
         <CategoryFilter categories={categories as any[]} />
+        <ColorFilter colors={uniqueColors} />
+        <p className="text-sm text-gray-500">
+          {count} {count === 1 ? "producto disponible" : "productos disponibles"}
+        </p>
       </div>
 
       {productsWithImages.length > 0 ? (

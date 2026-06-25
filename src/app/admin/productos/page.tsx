@@ -2,6 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import AdminProductSearch from "./AdminProductSearch"
 import DeleteProductButton from "@/components/DeleteProductButton"
+import ToggleDisponibleButton from "@/components/ToggleDisponibleButton"
+import { checkExpiredProducts } from "./actions"
 
 export const dynamic = "force-dynamic"
 
@@ -20,6 +22,7 @@ async function api(url: string) {
 }
 
 export default async function AdminProductosPage() {
+  const expiredCount = await checkExpiredProducts()
   const products = await api("products?select=*&order=created_at.desc")
 
   const productIds = (products as any[]).map((p) => p.id)
@@ -80,6 +83,12 @@ export default async function AdminProductosPage() {
 
       <AdminProductSearch categories={categories as any[]} />
 
+      {expiredCount > 0 && (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {expiredCount} {expiredCount === 1 ? "producto ha" : "productos han"} cumplido su ciclo de 15 días y se han desactivado automáticamente.
+        </div>
+      )}
+
       {/* Desktop table */}
       <div className="mt-6 hidden overflow-x-auto rounded-xl border border-gray-200 sm:block">
         <table className="w-full text-left text-sm">
@@ -90,6 +99,7 @@ export default async function AdminProductosPage() {
               <th className="px-4 py-3 font-medium">Nombre</th>
               <th className="px-4 py-3 font-medium">Color</th>
               <th className="px-4 py-3 font-medium">Categoría</th>
+              <th className="px-4 py-3 font-medium">Disponible</th>
               <th className="px-4 py-3 font-medium text-right">Acciones</th>
             </tr>
           </thead>
@@ -119,6 +129,12 @@ export default async function AdminProductosPage() {
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-3">
+                    <ToggleDisponibleButton
+                      productId={product.id}
+                      disponible={product.disponible}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
@@ -134,7 +150,7 @@ export default async function AdminProductosPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                   No hay productos
                 </td>
               </tr>
@@ -173,6 +189,11 @@ export default async function AdminProductosPage() {
                       {product.categories.nombre}
                     </span>
                   )}
+                  <span className="text-xs text-gray-300">·</span>
+                  <ToggleDisponibleButton
+                    productId={product.id}
+                    disponible={product.disponible}
+                  />
                 </div>
               </div>
               <div className="flex shrink-0 gap-1.5">

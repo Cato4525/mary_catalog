@@ -38,10 +38,10 @@ export default function SearchBar() {
       </svg>
       <input
         type="text"
-        placeholder="Buscar por código o nombre..."
+        placeholder="Buscar por código, nombre o color..."
         defaultValue={searchParams.get("q") || ""}
         onChange={(e) => handleSearch(e.target.value)}
-        aria-label="Buscar productos por código o nombre"
+        aria-label="Buscar productos por código, nombre o color"
         className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
       />
     </div>
