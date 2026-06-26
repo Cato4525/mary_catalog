@@ -121,9 +121,14 @@ export default async function HomePage({ searchParams }: Props) {
             unoptimized
           />
         )}
-        <h1 className="text-3xl font-bold text-gray-900">
-          {store?.store_name || "Catálogo"}
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {store?.store_name || "Catálogo"}
+          </h1>
+          <span className="rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700">
+            {count} {count === 1 ? "producto" : "productos"}
+          </span>
+        </div>
         {store?.store_description && (
           <p className="mt-1 text-gray-500">{store.store_description}</p>
         )}
@@ -133,9 +138,6 @@ export default async function HomePage({ searchParams }: Props) {
         <SearchBar />
         <CategoryFilter categories={categories as any[]} />
         <ColorFilter colors={uniqueColors} />
-        <p className="text-sm text-gray-500">
-          {count} {count === 1 ? "producto disponible" : "productos disponibles"}
-        </p>
       </div>
 
       {productsWithImages.length > 0 ? (
