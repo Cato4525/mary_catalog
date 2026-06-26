@@ -45,7 +45,7 @@ export default function ColorFilter({ colors }: { colors: string[] }) {
           className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-all ${
             current === color
               ? "border-primary-600 bg-primary-600 text-white shadow-sm"
-              : "border-transparent bg-gray-100 text-gray-600 hover:border-primary-400 hover:bg-gray-200 active:scale-[0.97]"
+              : "border-gray-300 bg-white text-gray-600 hover:border-primary-400 hover:bg-primary-50 active:scale-[0.97]"
           }`}
         >
           {color}
