@@ -6,25 +6,36 @@ import { revalidatePath } from "next/cache"
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
-    const codigo = formData.get("codigo") as string
     const nombre = formData.get("nombre") as string
-    const color = (formData.get("color") as string) || ""
+    const codigo = (formData.get("codigo") as string)?.trim() || null
     const descripcion = (formData.get("descripcion") as string) || ""
     const categoria_id = formData.get("categoria_id")
       ? Number(formData.get("categoria_id"))
       : null
-    const files = formData.getAll("images") as File[]
+    const tipo_id = formData.get("tipo_id")
+      ? Number(formData.get("tipo_id"))
+      : null
+    const variantsData = JSON.parse(
+      (formData.get("variants_data") as string) || "[]"
+    ) as { color_id: number }[]
 
-    if (!codigo || !nombre) {
+    if (!nombre) {
       return NextResponse.json(
-        { error: "Código y nombre son requeridos" },
+        { error: "Nombre es requerido" },
+        { status: 400 }
+      )
+    }
+
+    if (variantsData.length === 0) {
+      return NextResponse.json(
+        { error: "Debe agregar al menos un color" },
         { status: 400 }
       )
     }
 
     const { data: product, error: productError } = await supabaseAdmin
       .from("products")
-      .insert({ codigo, nombre, color, descripcion, categoria_id })
+      .insert({ nombre, codigo, descripcion, categoria_id, tipo_id, disponible: true })
       .select()
       .single()
 
@@ -32,31 +43,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: productError.message }, { status: 500 })
     }
 
-    let uploadedUrls: string[] = []
     try {
-      if (files.length > 0) {
-        uploadedUrls = await uploadMultipleToStorage(files)
+      for (let i = 0; i < variantsData.length; i++) {
+        const v = variantsData[i]
+        const files = formData.getAll(`variant_images_${i}`) as File[]
 
-        const imageRows = uploadedUrls.map((url, i) => ({
-          product_id: product.id,
-          url,
-          sort_order: i,
-        }))
+        const { data: variant, error: variantError } = await supabaseAdmin
+          .from("product_variants")
+          .insert({ product_id: product.id, color_id: v.color_id, activo: true })
+          .select()
+          .single()
 
-        const { error: imgError } = await supabaseAdmin
-          .from("product_images")
-          .insert(imageRows)
+        if (variantError) throw variantError
 
-        if (imgError) {
-          throw imgError
+        if (files.length > 0) {
+          const uploadedUrls = await uploadMultipleToStorage(files)
+          const imageRows = uploadedUrls.map((url, j) => ({
+            variant_id: variant.id,
+            url,
+            sort_order: j,
+          }))
+          const { error: imgError } = await supabaseAdmin
+            .from("product_images")
+            .insert(imageRows)
+          if (imgError) throw imgError
         }
       }
     } catch (err) {
       await supabaseAdmin.from("products").delete().eq("id", product.id)
-      if (uploadedUrls.length > 0) {
-        await deleteFromStorage(uploadedUrls)
-      }
-      const message = err instanceof Error ? err.message : "Error al guardar imágenes"
+      const message = err instanceof Error ? err.message : "Error al guardar variantes"
       return NextResponse.json({ error: message }, { status: 500 })
     }
 

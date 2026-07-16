@@ -4,12 +4,36 @@ export interface Category {
   created_at: string
 }
 
+export interface ProductType {
+  id: number
+  nombre: string
+  created_at: string
+}
+
+export interface Color {
+  id: number
+  nombre: string
+  codigo_hex: string
+  activo: boolean
+  created_at: string
+}
+
 export interface ProductImage {
   id: number
-  product_id: number
+  variant_id: number
   url: string
   sort_order: number
   created_at: string
+}
+
+export interface ProductVariant {
+  id: number
+  product_id: number
+  color_id: number
+  activo: boolean
+  created_at: string
+  colors?: Color | null
+  images?: ProductImage[]
 }
 
 export interface Product {
@@ -17,14 +41,14 @@ export interface Product {
   codigo: string
   nombre: string
   descripcion: string
-  color: string
   categoria_id: number | null
-  imagen_url: string
+  tipo_id: number | null
   disponible: boolean
-  fecha_activacion: string | null
   created_at: string
+  updated_at: string | null
   categories?: Category | null
-  images?: ProductImage[]
+  product_types?: ProductType | null
+  variants?: ProductVariant[]
 }
 
 export interface StoreSettings {

@@ -9,13 +9,21 @@ export async function deleteProduct(formData: FormData) {
   const id = formData.get("id")
   if (!id) return
 
-  const { data: images } = await supabaseAdmin
-    .from("product_images")
-    .select("url")
+  const { data: variants } = await supabaseAdmin
+    .from("product_variants")
+    .select("id")
     .eq("product_id", Number(id))
 
-  if (images && images.length > 0) {
-    await deleteFromStorage(images.map((img) => img.url))
+  if (variants && variants.length > 0) {
+    const variantIds = variants.map((v) => v.id)
+    const { data: images } = await supabaseAdmin
+      .from("product_images")
+      .select("url")
+      .in("variant_id", variantIds)
+
+    if (images && images.length > 0) {
+      await deleteFromStorage(images.map((img) => img.url))
+    }
   }
 
   await supabaseAdmin.from("products").delete().eq("id", Number(id))
@@ -29,34 +37,15 @@ export async function toggleDisponible(formData: FormData) {
   const disponible = formData.get("disponible") === "true"
   if (!id) return
 
-  const update: Record<string, any> = { disponible }
-  if (disponible) {
-    update.fecha_activacion = new Date().toISOString()
-  }
-
-  await supabaseAdmin.from("products").update(update).eq("id", Number(id))
+  await supabaseAdmin
+    .from("products")
+    .update({ disponible })
+    .eq("id", Number(id))
 
   revalidatePath("/admin/productos")
   revalidatePath("/")
 }
 
 export async function checkExpiredProducts() {
-  const quinceDias = new Date()
-  quinceDias.setDate(quinceDias.getDate() - 15)
-
-  const { data: expired } = await supabaseAdmin
-    .from("products")
-    .select("id")
-    .eq("disponible", true)
-    .lt("fecha_activacion", quinceDias.toISOString())
-
-  if (expired && expired.length > 0) {
-    const ids = expired.map((p) => p.id)
-    await supabaseAdmin
-      .from("products")
-      .update({ disponible: false })
-      .in("id", ids)
-  }
-
-  return expired?.length || 0
+  return 0
 }

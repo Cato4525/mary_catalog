@@ -20,7 +20,7 @@ export default function CartDrawer({ open, onClose }: Props) {
     if (items.length === 0) return ""
     const parts = items.map(
       (item, idx) =>
-        `*Producto ${idx + 1}*\nCódigo: ${item.codigo}\nNombre: ${item.nombre}\nColor: ${item.color}\nCategoría: ${item.categoria}\nCantidad: ${item.cantidad}\nImagen: ${item.imagen_url}`
+        `*Producto ${idx + 1}*\nNombre: ${item.nombre}\nColor: ${item.color}\nCategoría: ${item.categoria}\nCantidad: ${item.cantidad}\nImagen: ${item.imagen_url}`
     )
     const total = items.reduce((s, i) => s + i.cantidad, 0)
     return encodeURIComponent(
@@ -71,7 +71,7 @@ export default function CartDrawer({ open, onClose }: Props) {
               <div className="space-y-3">
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item.variant_id}
                     className="flex gap-3 rounded-lg border border-gray-200 bg-white p-3"
                   >
                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
@@ -86,9 +86,6 @@ export default function CartDrawer({ open, onClose }: Props) {
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col justify-between">
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-wider text-primary-500">
-                          {item.codigo}
-                        </p>
                         <p className="truncate text-sm font-medium text-gray-900">
                           {item.nombre}
                         </p>
@@ -99,7 +96,7 @@ export default function CartDrawer({ open, onClose }: Props) {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => updateCantidad(item.id, item.cantidad - 1)}
+                            onClick={() => updateCantidad(item.variant_id, item.cantidad - 1)}
                             className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 transition-colors hover:bg-gray-100 active:scale-95"
                             aria-label="Reducir cantidad"
                           >
@@ -111,7 +108,7 @@ export default function CartDrawer({ open, onClose }: Props) {
                             {item.cantidad}
                           </span>
                           <button
-                            onClick={() => updateCantidad(item.id, item.cantidad + 1)}
+                            onClick={() => updateCantidad(item.variant_id, item.cantidad + 1)}
                             className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-300 text-sm text-gray-600 transition-colors hover:bg-gray-100 active:scale-95"
                             aria-label="Aumentar cantidad"
                           >
@@ -121,7 +118,7 @@ export default function CartDrawer({ open, onClose }: Props) {
                           </button>
                         </div>
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.variant_id)}
                           className="rounded-md p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                           aria-label="Eliminar producto"
                         >

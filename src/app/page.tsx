@@ -3,12 +3,13 @@ import ProductCard from "@/components/ProductCard"
 import SearchBar from "@/components/SearchBar"
 import CategoryFilter from "@/components/CategoryFilter"
 import ColorFilter from "@/components/ColorFilter"
+import TypeFilter from "@/components/TypeFilter"
 import Image from "next/image"
 
 export const dynamic = "force-dynamic"
 
 interface Props {
-  searchParams: { q?: string; categoria?: string; color?: string; page?: string }
+  searchParams: { q?: string; categoria?: string; tipo?: string; color?: string; page?: string }
 }
 
 const PAGE_SIZE = 12
@@ -26,84 +27,142 @@ async function api(url: string) {
 }
 
 export default async function HomePage({ searchParams }: Props) {
-  const { q, categoria, color, page } = searchParams
+  const { q, categoria, tipo, color, page } = searchParams
   const currentPage = Number(page) || 1
 
-  const [settingsArr] = await Promise.all([api("store_settings?id=eq.1&select=*")])
+  const settingsArr = await api("store_settings?id=eq.1&select=*")
   const settings = (settingsArr as any[])?.[0] || null
 
-  let url = "products?select=*&order=created_at.desc"
+  let matchingProductIds: number[] | null = null
+  if (color) {
+    const colorRecord = await api(`colors?select=id&nombre=eq.${encodeURIComponent(color)}`)
+    if ((colorRecord as any[]).length > 0) {
+      const colorId = (colorRecord as any[])[0].id
+      const colorVariants = await api(
+        `product_variants?select=product_id&color_id=eq.${colorId}&activo=eq.true`
+      )
+      matchingProductIds = (colorVariants as any[]).map((v: any) => v.product_id)
+    }
+    if (!matchingProductIds || matchingProductIds.length === 0) {
+      matchingProductIds = [-1]
+    }
+  }
+
+  let searchProductIds: number[] | null = null
+  if (q) {
+    const nameResults = await api(
+      `products?select=id&nombre=ilike.*${q}*`
+    )
+    const nameIds = (nameResults as any[]).map((p: any) => p.id)
+
+    const codeResults = await api(
+      `products?select=id&codigo=ilike.*${q}*`
+    )
+    const codeIds = (codeResults as any[]).map((p: any) => p.id)
+
+    const colorRecords = await api(
+      `colors?select=id&nombre=ilike.*${q}*`
+    )
+    const colorIds = (colorRecords as any[]).map((c: any) => c.id)
+    let colorSearchIds: number[] = []
+    if (colorIds.length > 0) {
+      const colorSearchVariants = await api(
+        `product_variants?select=product_id&color_id=in.(${colorIds.join(",")})`
+      )
+      colorSearchIds = (colorSearchVariants as any[]).map((v: any) => v.product_id)
+    }
+
+    searchProductIds = Array.from(new Set([...nameIds, ...codeIds, ...colorSearchIds]))
+    if (searchProductIds.length === 0) {
+      searchProductIds = [-1]
+    }
+  }
+
+  let url = "products?select=*,categories(id,nombre),product_types(id,nombre)&order=created_at.desc"
   const filters: string[] = []
   filters.push("disponible=eq.true")
-  if (q) {
-    filters.push(`or=(codigo.ilike.*${q}*,nombre.ilike.*${q}*,color.ilike.*${q}*)`)
+
+  if (matchingProductIds) {
+    filters.push(`id=in.(${matchingProductIds.join(",")})`)
+  }
+  if (searchProductIds) {
+    filters.push(`id=in.(${searchProductIds.join(",")})`)
   }
   if (categoria) {
     filters.push(`categoria_id=eq.${categoria}`)
   }
-  if (color) {
-    filters.push(`color=ilike.*${color}*`)
+  if (tipo) {
+    filters.push(`tipo_id=eq.${tipo}`)
   }
+
   if (filters.length) url += "&" + filters.join("&")
 
-  const from = (currentPage - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
-  url += `&offset=${from}&limit=${PAGE_SIZE}`
-
-  const [{ products, count }, categories, distinctColors] = await Promise.all([
-    (async () => {
-      const countUrl = `${supabaseUrl}/rest/v1/products?select=count&${filters.join("&")}`.replace(/&offset=.*$/, "").replace(/&limit=.*$/, "")
-      const [data, countRes] = await Promise.all([
-        api(url),
-        fetch(countUrl, {
-          headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Prefer: "count=exact" },
-          cache: "no-store",
-        }),
-      ])
-      const countText = countRes.headers.get("content-range") || "0-0/0"
-      const total = parseInt(countText.split("/")[1] || "0", 10)
-      return { products: data, count: total }
-    })(),
-    api("categories?select=*&order=nombre.asc"),
-    api("products?select=color&disponible=eq.true&order=color.asc"),
-  ]) as any
-
-  const productIds = (products as any[])?.map((p: any) => p.id) || []
-  const catIds = Array.from(
-    new Set(
-      (products as any[])
-        .map((p: any) => p.categoria_id)
-        .filter(Boolean)
-    )
-  ) as number[]
-
-  const [allImages, catMap] = await Promise.all([
-    productIds.length
-      ? api(`product_images?select=*&product_id=in.(${productIds.join(",")})&order=sort_order.asc`)
-      : Promise.resolve([]),
-    catIds.length
-      ? api(`categories?select=*&id=in.(${catIds.join(",")})`)
-      : Promise.resolve([]),
+  const countUrl = `${supabaseUrl}/rest/v1/products?select=count&${filters.join("&")}`
+  const [data, countRes] = await Promise.all([
+    api(url + `&offset=${(currentPage - 1) * PAGE_SIZE}&limit=${PAGE_SIZE}`),
+    fetch(countUrl, {
+      headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}`, Prefer: "count=exact" },
+      cache: "no-store",
+    }),
   ])
 
-  const imagesByProduct: Record<number, any[]> = {}
+  const products = data as any[]
+  const countText = countRes.headers.get("content-range") || "0-0/0"
+  const count = parseInt(countText.split("/")[1] || "0", 10)
+
+  const productIds = products.map((p: any) => p.id)
+
+  const [allVariants, categories, productTypes] = await Promise.all([
+    productIds.length
+      ? api(`product_variants?select=*&product_id=in.(${productIds.join(",")})&activo=eq.true&order=created_at.asc`)
+      : Promise.resolve([]),
+    api("categories?select=*&order=nombre.asc"),
+    api("product_types?select=*&order=nombre.asc"),
+  ])
+
+  const variantIds = (allVariants as any[]).map((v: any) => v.id)
+
+  const allImages = variantIds.length
+    ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})&order=sort_order.asc`)
+    : []
+
+  const imagesByVariant: Record<number, any[]> = {}
   for (const img of (allImages as any[]) || []) {
-    if (!imagesByProduct[img.product_id]) imagesByProduct[img.product_id] = []
-    imagesByProduct[img.product_id].push(img)
+    if (!imagesByVariant[img.variant_id]) imagesByVariant[img.variant_id] = []
+    imagesByVariant[img.variant_id].push(img)
   }
 
-  const catById: Record<number, any> = {}
-  for (const c of (catMap as any[]) || []) catById[c.id] = c
+  const variantsByProduct: Record<number, any[]> = {}
+  for (const v of (allVariants as any[]) || []) {
+    if (!variantsByProduct[v.product_id]) variantsByProduct[v.product_id] = []
+    variantsByProduct[v.product_id].push(v)
+  }
 
-  const productsWithImages = ((products as any[]) || []).map((p: any) => ({
-    ...p,
-    images: imagesByProduct[p.id] || [],
-    categories: catById[p.categoria_id] || null,
-  }))
+  const allColorIds = Array.from(new Set((allVariants as any[]).map((v: any) => v.color_id).filter(Boolean)))
+  const colorMap: Record<number, { nombre: string; codigo_hex: string }> = {}
+  if (allColorIds.length > 0) {
+    const colors = await api(`colors?select=id,nombre,codigo_hex&id=in.(${allColorIds.join(",")})`)
+    for (const c of (colors as any[])) {
+      colorMap[c.id] = { nombre: c.nombre, codigo_hex: c.codigo_hex }
+    }
+  }
 
-  const uniqueColors = Array.from(
-    new Set((distinctColors as any[])?.map((p: any) => p.color).filter(Boolean))
-  ) as string[]
+  const uniqueColors = Object.values(colorMap).map((c) => c.nombre).filter(Boolean)
+  const uniqueTypes = (productTypes as any[]).map((t: any) => t.nombre).filter(Boolean)
+
+  const productsWithVariants = products.map((p: any) => {
+    const variants = (variantsByProduct[p.id] || []).map((v: any) => ({
+      ...v,
+      color: colorMap[v.color_id]?.nombre || "",
+      color_hex: colorMap[v.color_id]?.codigo_hex || null,
+      images: imagesByVariant[v.id] || [],
+    }))
+    return {
+      ...p,
+      variants,
+      categories: p.categories || null,
+    }
+  })
 
   const totalPages = count ? Math.ceil(count / PAGE_SIZE) : 1
   const store = settings as StoreSettings | null
@@ -136,14 +195,15 @@ export default async function HomePage({ searchParams }: Props) {
 
       <div className="mb-6 space-y-4">
         <SearchBar />
-        <CategoryFilter categories={categories as any[]} />
+        <CategoryFilter categories={(categories as any[]) || []} />
+        <TypeFilter types={(productTypes as any[]) || []} />
         <ColorFilter colors={uniqueColors} />
       </div>
 
-      {productsWithImages.length > 0 ? (
+      {productsWithVariants.length > 0 ? (
         <>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {(productsWithImages as Product[]).map((product, i) => (
+            {productsWithVariants.map((product: any, i: number) => (
               <ProductCard key={product.id} product={product} priority={i < 4} />
             ))}
           </div>
@@ -156,6 +216,8 @@ export default async function HomePage({ searchParams }: Props) {
                   href={`/?${new URLSearchParams({
                     ...(q && { q }),
                     ...(categoria && { categoria }),
+                    ...(tipo && { tipo }),
+                    ...(color && { color }),
                     page: String(p),
                   }).toString()}`}
                   aria-current={p === currentPage ? "page" : undefined}

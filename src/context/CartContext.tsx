@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export interface CartItem {
   id: number
-  codigo: string
+  variant_id: number
   nombre: string
   color: string
   categoria: string
@@ -50,23 +50,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((item: Omit<CartItem, "cantidad">) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id)
+      const existing = prev.find((i) => i.variant_id === item.variant_id)
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, cantidad: i.cantidad + 1 } : i
+          i.variant_id === item.variant_id ? { ...i, cantidad: i.cantidad + 1 } : i
         )
       }
       return [...prev, { ...item, cantidad: 1 }]
     })
   }, [])
 
-  const removeItem = useCallback((id: number) => {
-    setItems((prev) => prev.filter((i) => i.id !== id))
+  const removeItem = useCallback((variantId: number) => {
+    setItems((prev) => prev.filter((i) => i.variant_id !== variantId))
   }, [])
 
-  const updateCantidad = useCallback((id: number, cantidad: number) => {
+  const updateCantidad = useCallback((variantId: number, cantidad: number) => {
     if (cantidad < 1) return
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, cantidad } : i)))
+    setItems((prev) => prev.map((i) => (i.variant_id === variantId ? { ...i, cantidad } : i)))
   }, [])
 
   const clearCart = useCallback(() => {

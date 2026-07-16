@@ -2,13 +2,13 @@
 
 interface Props {
   whatsapp: string
-  codigo: string
   nombre: string
+  color: string
   imagenUrl: string
 }
 
-export default function ProductWhatsAppButton({ whatsapp, codigo, nombre, imagenUrl }: Props) {
-  const message = `Estoy interesado en este producto:%0A%0ACódigo: ${codigo}%0ANombre: ${nombre}%0AImagen: ${imagenUrl}`
+export default function ProductWhatsAppButton({ whatsapp, nombre, color, imagenUrl }: Props) {
+  const message = `Estoy interesado en este producto:%0A%0ANombre: ${nombre}%0AColor: ${color}%0AImagen: ${imagenUrl}`
 
   return (
     <a

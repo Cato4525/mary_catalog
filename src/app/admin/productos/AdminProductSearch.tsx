@@ -1,10 +1,16 @@
 "use client"
 
-import type { Category } from "@/lib/types"
+import type { Category, ProductType } from "@/lib/types"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useRef } from "react"
 
-export default function AdminProductSearch({ categories }: { categories: Category[] }) {
+export default function AdminProductSearch({
+  categories,
+  productTypes,
+}: {
+  categories: Category[]
+  productTypes: ProductType[]
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const timer = useRef<ReturnType<typeof setTimeout>>()
@@ -25,13 +31,13 @@ export default function AdminProductSearch({ categories }: { categories: Categor
     [router, searchParams]
   )
 
-  const handleCategory = useCallback(
-    (catId: string) => {
+  const handleSelect = useCallback(
+    (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString())
-      if (catId) {
-        params.set("categoria", catId)
+      if (value) {
+        params.set(key, value)
       } else {
-        params.delete("categoria")
+        params.delete(key)
       }
       router.push(`/admin/productos?${params.toString()}`)
     },
@@ -49,21 +55,31 @@ export default function AdminProductSearch({ categories }: { categories: Categor
         </svg>
         <input
           type="text"
-          placeholder="Buscar por código, nombre o color..."
+          placeholder="Buscar por nombre, código o color..."
           defaultValue={searchParams.get("q") || ""}
           onChange={(e) => handleSearch(e.target.value)}
-          aria-label="Buscar productos por código, nombre o color"
+          aria-label="Buscar productos"
           className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
         />
       </div>
       <select
         defaultValue={searchParams.get("categoria") || ""}
-        onChange={(e) => handleCategory(e.target.value)}
+        onChange={(e) => handleSelect("categoria", e.target.value)}
         className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
       >
         <option value="">Todas las categorías</option>
         {categories.map((cat) => (
           <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+        ))}
+      </select>
+      <select
+        defaultValue={searchParams.get("tipo") || ""}
+        onChange={(e) => handleSelect("tipo", e.target.value)}
+        className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
+      >
+        <option value="">Todos los tipos</option>
+        {productTypes.map((t) => (
+          <option key={t.id} value={t.id}>{t.nombre}</option>
         ))}
       </select>
     </div>

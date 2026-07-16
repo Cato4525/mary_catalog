@@ -4,7 +4,7 @@ import { useCart } from "@/context/CartContext"
 import type { CartItem } from "@/context/CartContext"
 
 interface Props {
-  product: Pick<CartItem, "id" | "codigo" | "nombre" | "color" | "categoria" | "imagen_url">
+  product: Pick<CartItem, "id" | "variant_id" | "nombre" | "color" | "categoria" | "imagen_url">
   variant?: "icon" | "full"
 }
 

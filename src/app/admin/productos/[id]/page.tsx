@@ -21,16 +21,38 @@ export default async function EditarProductoPage({
 }) {
   const productId = Number(params.id)
 
-  const [products, productImages, categories] = await Promise.all([
+  const [products, variants, categories, productTypes, colors] = await Promise.all([
     api(`products?select=*&id=eq.${productId}`),
-    api(`product_images?select=*&product_id=eq.${productId}&order=sort_order.asc`),
+    api(`product_variants?select=*&product_id=eq.${productId}&order=created_at.asc`),
     api("categories?select=*&order=nombre.asc"),
+    api("product_types?select=*&order=nombre.asc"),
+    api("colors?select=*&order=nombre.asc"),
   ])
 
   const product = (products as any[])?.[0]
   if (!product) notFound()
 
-  const productWithImages = { ...product, images: productImages }
+  const variantIds = (variants as any[]).map((v: any) => v.id)
+
+  const allImages = variantIds.length
+    ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})&order=sort_order.asc`)
+    : []
+
+  const imagesByVariant: Record<number, any[]> = {}
+  for (const img of (allImages as any[])) {
+    if (!imagesByVariant[img.variant_id]) imagesByVariant[img.variant_id] = []
+    imagesByVariant[img.variant_id].push(img)
+  }
+
+  const variantsWithImages = (variants as any[]).map((v: any) => ({
+    ...v,
+    images: imagesByVariant[v.id] || [],
+  }))
+
+  const productWithVariants = {
+    ...product,
+    variants: variantsWithImages,
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -44,7 +66,12 @@ export default async function EditarProductoPage({
         Volver a Productos
       </Link>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Editar Producto</h1>
-      <ProductForm product={productWithImages} categories={categories as any[]} />
+      <ProductForm
+        product={productWithVariants as any}
+        categories={(categories as any[]) || []}
+        productTypes={(productTypes as any[]) || []}
+        colors={(colors as any[]) || []}
+      />
     </div>
   )
 }
