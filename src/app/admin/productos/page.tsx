@@ -34,7 +34,7 @@ export default async function AdminProductosPage({
   const productIds = (products as any[]).map((p: any) => p.id)
 
   const allVariants = productIds.length
-    ? await api(`product_variants?select=id,product_id,color_id&product_id=in.(${productIds.join(",")})`)
+    ? await api(`product_variants?select=id,product_id,color_id,disponible&product_id=in.(${productIds.join(",")})`)
     : []
 
   const variantIds = (allVariants as any[]).map((v: any) => v.id)
@@ -160,7 +160,16 @@ export default async function AdminProductosPage({
                   <td className="px-4 py-3 font-mono text-xs text-gray-500">
                     {product.codigo || "-"}
                   </td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{product.nombre}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">{product.nombre}</span>
+                      {product.destacado && (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                          Destacado
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     {product.categories && (
                       <span className="rounded-full bg-primary-50 px-2 py-0.5 text-xs text-primary-700">
@@ -172,10 +181,13 @@ export default async function AdminProductosPage({
                     {product.product_types?.nombre || "-"}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                    <Link
+                      href={`/admin/productos/${product.id}/variantes`}
+                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                    >
                       {product.colorCount}
                       {product.colorCount === 1 ? " color" : " colores"}
-                    </span>
+                    </Link>
                   </td>
                   <td className="px-4 py-3">
                     <ToggleDisponibleButton
@@ -185,6 +197,12 @@ export default async function AdminProductosPage({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/productos/${product.id}/variantes`}
+                        className="rounded-lg bg-primary-50 px-3 py-2.5 text-sm font-medium text-primary-700 transition-all hover:bg-primary-100 active:scale-[0.97]"
+                      >
+                        Colores
+                      </Link>
                       <Link
                         href={`/admin/productos/${product.id}`}
                         className="rounded-lg bg-gray-100 px-3 py-2.5 text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97]"
@@ -223,7 +241,14 @@ export default async function AdminProductosPage({
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-gray-900">{product.nombre}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate font-medium text-gray-900">{product.nombre}</p>
+                  {product.destacado && (
+                    <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-700">
+                      ★
+                    </span>
+                  )}
+                </div>
                 <p className="text-[10px] font-mono text-gray-400">{product.codigo || ""}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
                   {product.categories && (
@@ -236,9 +261,12 @@ export default async function AdminProductosPage({
                       {product.product_types.nombre}
                     </span>
                   )}
-                  <span className="text-[10px] text-gray-400">
+                  <Link
+                    href={`/admin/productos/${product.id}/variantes`}
+                    className="text-[10px] text-primary-600 hover:text-primary-700"
+                  >
                     {product.colorCount} {product.colorCount === 1 ? "color" : "colores"}
-                  </span>
+                  </Link>
                   <ToggleDisponibleButton
                     productId={product.id}
                     disponible={product.disponible}
@@ -246,6 +274,12 @@ export default async function AdminProductosPage({
                 </div>
               </div>
               <div className="flex shrink-0 gap-1.5">
+                <Link
+                  href={`/admin/productos/${product.id}/variantes`}
+                  className="rounded-lg bg-primary-50 px-2 py-2.5 text-xs font-medium text-primary-700 hover:bg-primary-100"
+                >
+                  Colores
+                </Link>
                 <Link
                   href={`/admin/productos/${product.id}`}
                   className="rounded-lg bg-gray-100 px-3 py-2.5 text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97]"

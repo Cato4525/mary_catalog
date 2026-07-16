@@ -9,31 +9,30 @@ const SIZES = ["S", "M", "L", "XL"]
 
 interface Variant {
   id: number
-  color: string
-  color_hex?: string | null
-  images: { url: string; sort_order: number }[]
+  color_id: number
+  colors: { nombre: string; hex: string } | null
+  disponible: boolean
+  images: { url: string; orden: number }[]
 }
 
 interface Props {
   product: any
   variants: Variant[]
-  whatsapp: string
-  category: any
-  productType: any
+  whatsapp?: string
 }
 
 export default function ProductDetail({
   product,
   variants,
   whatsapp,
-  category,
-  productType,
 }: Props) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
   const selectedVariant = variants[selectedVariantIndex] || variants[0]
   const images = (selectedVariant?.images || [])
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map((img) => img.url)
+    .sort((a: any, b: any) => a.orden - b.orden)
+    .map((img: any) => img.url)
+  const colorName = selectedVariant?.colors?.nombre || ""
+  const colorHex = selectedVariant?.colors?.hex || null
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
@@ -54,14 +53,14 @@ export default function ProductDetail({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-          {category && (
+          {product.categories && (
             <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700">
-              {category.nombre}
+              {product.categories.nombre}
             </span>
           )}
-          {productType && (
+          {product.product_types?.nombre && (
             <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-              {productType.nombre}
+              {product.product_types.nombre}
             </span>
           )}
         </div>
@@ -69,7 +68,7 @@ export default function ProductDetail({
         {variants.length > 0 && (
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Color: <span className="font-normal text-gray-500">{selectedVariant?.color}</span>
+              Color: <span className="font-normal text-gray-500">{colorName}</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {variants.map((v, i) => (
@@ -83,13 +82,13 @@ export default function ProductDetail({
                       : "border-gray-300 bg-white text-gray-700 hover:border-primary-400 hover:bg-primary-50"
                   }`}
                 >
-                  {v.color_hex && (
+                  {v.colors?.hex && (
                     <span
                       className="h-4 w-4 rounded-full border border-gray-300 shadow-inner"
-                      style={{ backgroundColor: v.color_hex }}
+                      style={{ backgroundColor: v.colors.hex }}
                     />
                   )}
-                  {v.color}
+                  {v.colors?.nombre}
                   {v.images.length > 0 && (
                     <span className="ml-0.5 text-xs opacity-60">
                       ({v.images.length})
@@ -138,8 +137,8 @@ export default function ProductDetail({
               id: product.id,
               variant_id: selectedVariant.id,
               nombre: product.nombre,
-              color: selectedVariant.color,
-              categoria: category?.nombre || "",
+              color: colorName,
+              categoria: product.categories?.nombre || "",
               imagen_url: images[0] || "",
             }}
           />
@@ -149,7 +148,7 @@ export default function ProductDetail({
           <ProductWhatsAppButton
             whatsapp={whatsapp}
             nombre={product.nombre}
-            color={selectedVariant.color}
+            color={colorName}
             imagenUrl={images[0]}
           />
         )}

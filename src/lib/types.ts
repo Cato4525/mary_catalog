@@ -30,7 +30,8 @@ export interface ProductVariant {
   id: number
   product_id: number
   color_id: number
-  activo: boolean
+  disponible: boolean
+  orden: number
   created_at: string
   colors?: Color | null
   images?: ProductImage[]
@@ -39,11 +40,13 @@ export interface ProductVariant {
 export interface Product {
   id: number
   codigo: string
+  slug: string | null
   nombre: string
   descripcion: string
   categoria_id: number | null
   tipo_id: number | null
   disponible: boolean
+  destacado: boolean
   created_at: string
   updated_at: string | null
   categories?: Category | null

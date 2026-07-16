@@ -1,82 +1,81 @@
-import type { Product, ProductVariant, ProductImage } from "@/lib/types"
 import Image from "next/image"
 import Link from "next/link"
+import AddToCartButton from "./AddToCartButton"
 
-const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' fill='%23f3f4f6'%3E%3Crect width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' fill='%239ca3af' font-family='sans-serif' font-size='16' text-anchor='middle' dy='.3em'%3ESin imagen%3C/text%3E%3C/svg%3E"
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='560' fill='%23f3f4f6'%3E%3Crect width='400' height='560'/%3E%3C/svg%3E"
 
-interface Props {
-  product: Product & {
-    codigo?: string
-    variants?: (ProductVariant & { color?: string; images?: ProductImage[] })[]
-  }
-  priority?: boolean
+interface ProductCardProps {
+  product: any
+  colors?: any[]
 }
 
-export default function ProductCard({ product, priority }: Props) {
-  const variants = product.variants || []
-  const firstVariant = variants[0]
-  const firstImage = firstVariant?.images?.[0]?.url || ""
-  const totalImages = variants.reduce(
-    (sum, v) => sum + (v.images?.length || 0),
-    0
-  )
+export default function ProductCard({ product, colors = [] }: ProductCardProps) {
+  const imageUrl = product.imagen_url || PLACEHOLDER
 
   return (
-    <div className="group block overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-100 hover:shadow-lg">
-      <Link
-        href={`/productos/${product.id}`}
-        className="block"
-      >
-        <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
+    <div className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg">
+      <Link href={`/productos/${product.id}`} className="block">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-50">
           <Image
-            src={firstImage || PLACEHOLDER}
+            src={imageUrl}
             alt={product.nombre}
             fill
-            priority={priority}
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            unoptimized={!!firstImage}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            unoptimized
           />
-          {variants.length > 1 && (
-            <span className="absolute right-2 top-2 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-              +{variants.length - 1} colores
-            </span>
-          )}
-        </div>
-        <div className="space-y-1 p-4">
-          {product.codigo && (
-            <p className="font-mono text-[10px] text-gray-400">{product.codigo}</p>
-          )}
-          <h3 className="font-semibold text-gray-900 transition-colors duration-200 group-hover:text-primary-700">
-            {product.nombre}
-          </h3>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
-            {product.categories && (
-              <span className="truncate rounded-full bg-primary-50 px-2 py-0.5 text-primary-700">
-                {product.categories.nombre}
+          {!product.disponible && (
+            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+              <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+                Agotado
               </span>
-            )}
-            {variants.length > 0 && (
-              <>
-                <span className="shrink-0">·</span>
-                <span className="truncate">
-                  {variants.length === 1
-                    ? variants[0].color || "Color"
-                    : `${variants.length} colores`}
-                </span>
-              </>
-            )}
-          </div>
-          {totalImages > 1 && (
-            <div className="flex items-center gap-1 text-xs text-gray-400">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>{totalImages} imágenes</span>
             </div>
           )}
         </div>
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-mono text-gray-400 mb-1">
+                {product.codigo || ""}
+              </p>
+              <h3 className="font-semibold text-gray-900 truncate">{product.nombre}</h3>
+            </div>
+            {product.destacado && (
+              <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                ★
+              </span>
+            )}
+          </div>
+          {product.categories && (
+            <p className="mt-1 text-sm text-primary-600">{product.categories.nombre}</p>
+          )}
+          {product.product_types?.nombre && (
+            <p className="mt-0.5 text-xs text-gray-500">{product.product_types.nombre}</p>
+          )}
+        </div>
       </Link>
+      {colors.length > 0 && (
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-1.5">
+            <div className="flex -space-x-1">
+              {colors.slice(0, 6).map((c: any, i: number) => (
+                <div
+                  key={c.id || i}
+                  title={c.color || ""}
+                  className="h-4 w-4 rounded-full border-2 border-white"
+                  style={{ backgroundColor: c.hex || "#e5e7eb" }}
+                />
+              ))}
+            </div>
+            {colors.length > 6 && (
+              <span className="text-[10px] text-gray-500">+{colors.length - 6}</span>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="px-4 pb-4">
+        <AddToCartButton product={product} />
+      </div>
     </div>
   )
 }
