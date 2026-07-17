@@ -1,11 +1,8 @@
-import Image from "next/image"
-import Link from "next/link"
-import SearchBar from "@/components/SearchBar"
+import CatalogHeader from "@/components/CatalogHeader"
 import ColorFilter from "@/components/ColorFilter"
-import TypeFilter from "@/components/TypeFilter"
 import ProductCard from "@/components/ProductCard"
 
-const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='560' fill='%23f3f4f6'%3E%3Crect width='400' height='560'/%3E%3C/svg%3E"
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
 
 export const dynamic = "force-dynamic"
 
@@ -80,7 +77,7 @@ export default async function Home({
         colors: variants.map((v: any) => ({
           id: v.color_id,
           color: (colors as any[]).find((c: any) => c.id === v.color_id)?.nombre || "",
-          hex: (colors as any[]).find((c: any) => c.id === v.color_id)?.hex || "#e5e7eb",
+          hex: (colors as any[]).find((c: any) => c.id === v.color_id)?.codigo_hex || "#808080",
         })),
         colorNames,
         categories: p.categories || null,
@@ -116,26 +113,27 @@ export default async function Home({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Mary Catálogo</h1>
-        <p className="mt-2 text-gray-500">Leggings de moda</p>
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-gray-900">Mary</h1>
       </div>
 
-      <SearchBar />
+      <CatalogHeader
+        categories={categories as any[]}
+        productTypes={productTypes as any[]}
+      />
 
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-        <TypeFilter types={productTypes as any[]} />
+      <div className="mt-4">
         <ColorFilter colors={colors as any[]} />
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product: any) => (
             <ProductCard key={product.id} product={product} colors={product.colors} />
           ))
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
             <svg className="mb-3 h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
