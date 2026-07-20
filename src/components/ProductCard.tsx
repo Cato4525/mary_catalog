@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRef, useState } from "react"
 import ProductActions from "./ProductActions"
+import AddToCartButton from "./AddToCartButton"
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
 
@@ -142,6 +143,21 @@ export default function ProductCard({
               isFavorite={isFavorite}
               onToggleFavorite={onToggleFavorite}
             />
+            {product.first_variant_id && (
+              <div className="mt-4 flex justify-center">
+                <AddToCartButton
+                  product={{
+                    id: product.id,
+                    variant_id: product.first_variant_id,
+                    nombre: product.nombre,
+                    color: colors[0]?.color || "",
+                    categoria: product.categories?.nombre || "",
+                    imagen_url: product.imagen_url || "",
+                  }}
+                  variant="icon"
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -228,42 +244,58 @@ export default function ProductCard({
         )}
 
         {onToggleFavorite && (
-          <button
-            onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              onToggleFavorite()
-            }}
-            className="absolute right-3 top-3 z-10"
-          >
-            <div
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all ${
-                isFavorite
-                  ? "bg-red-500/20 shadow-lg"
-                  : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
-              }`}
+          <div className="absolute right-3 top-3 z-10 flex flex-col items-center gap-2">
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onToggleFavorite()
+              }}
             >
-              <svg
-                className={`h-4 w-4 transition-all ${
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
                   isFavorite
-                    ? "fill-red-500 text-red-500 scale-110"
-                    : "fill-none text-white hover:scale-110"
+                    ? "bg-red-500/20 shadow-lg"
+                    : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
                 }`}
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                <svg
+                  className={`h-4 w-4 transition-all ${
+                    isFavorite
+                      ? "fill-red-500 text-red-500 scale-110"
+                      : "fill-none text-white hover:scale-110"
+                  }`}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+                {likeCount > 0 && (
+                  <span className="ml-0.5 text-[9px] font-bold text-white">{likeCount}</span>
+                )}
+              </div>
+            </button>
+            {product.first_variant_id && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <AddToCartButton
+                  product={{
+                    id: product.id,
+                    variant_id: product.first_variant_id,
+                    nombre: product.nombre,
+                    color: colors[0]?.color || "",
+                    categoria: product.categories?.nombre || "",
+                    imagen_url: images[0] || "",
+                  }}
+                  variant="icon"
                 />
-              </svg>
-              {likeCount > 0 && (
-                <span className="text-[10px] font-bold text-white">{likeCount}</span>
-              )}
-            </div>
-          </button>
+              </div>
+            )}
+          </div>
         )}
 
         <div className="absolute bottom-0 left-0 right-0 p-4">

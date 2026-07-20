@@ -19,7 +19,7 @@ export default function AddToCartButton({ product, variant = "full" }: Props) {
     return (
       <button
         onClick={handleClick}
-        className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white shadow-sm transition-all hover:bg-primary-700 active:scale-90"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-black/20 text-white/70 shadow-sm backdrop-blur-sm transition-all hover:bg-black/30 hover:text-white/90 active:scale-90"
         aria-label={`Agregar ${product.nombre} al carrito`}
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

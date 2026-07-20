@@ -79,8 +79,10 @@ export default async function Home({
         ...p,
         imagen_url: firstImage || PLACEHOLDER,
         images: allProductImages.length > 0 ? allProductImages : [firstImage || PLACEHOLDER],
+        first_variant_id: variants[0]?.id || null,
         colors: variants.map((v: any) => ({
           id: v.color_id,
+          variant_id: v.id,
           color: (colors as any[]).find((c: any) => c.id === v.color_id)?.nombre || "",
           hex: (colors as any[]).find((c: any) => c.id === v.color_id)?.codigo_hex || "#808080",
         })),
