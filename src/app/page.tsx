@@ -121,8 +121,8 @@ export default async function Home({
     <>
       {/* MOBILE: Full-screen TikTok scroll */}
       <div className="relative sm:hidden">
-        <div className="absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-black/60 via-black/30 to-transparent pt-14 pb-8">
-          <div className="px-3">
+        <div className="absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-black/70 via-black/40 to-transparent pt-[52px] pb-6">
+          <div className="px-3 pt-2">
             <CatalogHeader
               categories={categories as any[]}
               productTypes={productTypes as any[]}

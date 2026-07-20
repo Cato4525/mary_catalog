@@ -135,7 +135,7 @@ export default function ProductCard({
 
         {/* Action buttons - right side */}
         {onToggleFavorite && (
-          <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
+          <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2">
             <ProductActions
               productId={product.id}
               productName={product.nombre}
