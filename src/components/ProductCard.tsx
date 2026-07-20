@@ -152,7 +152,7 @@ export default function ProductCard({
               <div
                 key={c.id || i}
                 title={c.color || ""}
-                className="h-5 w-5 rounded-full border-2 border-white/80 shadow-lg"
+                className="h-5 w-5 rounded-full border-2 border-white/40 shadow-md"
                 style={{ backgroundColor: c.hex || "#808080" }}
               />
             ))}

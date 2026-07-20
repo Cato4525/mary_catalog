@@ -52,17 +52,17 @@ export default function ProductActions({
         className="group flex flex-col items-center gap-1"
       >
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-full transition-all ${
+          className={`flex h-11 w-11 items-center justify-center rounded-full transition-all ${
             isFavorite
-              ? "bg-red-500/20 shadow-lg"
-              : "bg-white/10 backdrop-blur-sm group-hover:bg-white/20"
+              ? "bg-red-500/15 shadow-lg"
+              : "bg-black/20 backdrop-blur-sm group-hover:bg-black/30"
           }`}
         >
           <svg
-            className={`h-7 w-7 transition-all ${
+            className={`h-5 w-5 transition-all ${
               isFavorite
-                ? "fill-red-500 text-red-500 scale-110"
-                : "fill-none text-white group-hover:scale-110"
+                ? "fill-red-400 text-red-400 scale-110"
+                : "fill-none text-white/70 group-hover:scale-110 group-hover:text-white/90"
             }`}
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -75,7 +75,7 @@ export default function ProductActions({
             />
           </svg>
         </div>
-        <span className="text-[10px] font-medium text-white drop-shadow-md">
+        <span className="text-[10px] font-medium text-white/60 drop-shadow-md">
           Me gusta
         </span>
       </button>
@@ -85,9 +85,9 @@ export default function ProductActions({
         onClick={(e) => e.stopPropagation()}
         className="group flex flex-col items-center gap-1"
       >
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-all group-hover:bg-white/20">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm transition-all group-hover:bg-black/30">
           <svg
-            className="h-7 w-7 text-white transition-transform group-hover:scale-110"
+            className="h-5 w-5 text-white/70 transition-all group-hover:scale-110 group-hover:text-white/90"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -100,7 +100,7 @@ export default function ProductActions({
             />
           </svg>
         </div>
-        <span className="text-[10px] font-medium text-white drop-shadow-md">
+        <span className="text-[10px] font-medium text-white/60 drop-shadow-md">
           Detalles
         </span>
       </Link>
@@ -109,9 +109,9 @@ export default function ProductActions({
         onClick={handleShare}
         className="group flex flex-col items-center gap-1"
       >
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition-all group-hover:bg-white/20">
+        <div className="relative flex h-11 w-11 items-center justify-center rounded-full bg-black/20 backdrop-blur-sm transition-all group-hover:bg-black/30">
           <svg
-            className="h-7 w-7 text-white transition-transform group-hover:scale-110"
+            className="h-5 w-5 text-white/70 transition-all group-hover:scale-110 group-hover:text-white/90"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -129,7 +129,7 @@ export default function ProductActions({
             </span>
           )}
         </div>
-        <span className="text-[10px] font-medium text-white drop-shadow-md">
+        <span className="text-[10px] font-medium text-white/60 drop-shadow-md">
           Compartir
         </span>
       </button>
