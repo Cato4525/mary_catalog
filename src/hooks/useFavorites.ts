@@ -25,7 +25,7 @@ export function useFavorites() {
         next.add(productId)
       }
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)))
       } catch {}
       return next
     })

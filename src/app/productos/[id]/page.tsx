@@ -16,43 +16,47 @@ async function api(url: string) {
 }
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
-  const products = await api(`products?select=*,categories(nombre)&id=eq.${params.id}`)
-  const product = products[0]
-  if (!product) notFound()
+  try {
+    const products = await api(`products?select=*,categories(nombre)&id=eq.${params.id}`)
+    const product = products[0]
+    if (!product) notFound()
 
-  const variants = await api(`product_variants?select=*&product_id=eq.${params.id}&order=orden.asc`)
+    const variants = await api(`product_variants?select=*&product_id=eq.${params.id}&order=orden.asc`)
 
-  const colorIds = Array.from(new Set(variants.map((v: any) => v.color_id).filter(Boolean)))
-  const colors = colorIds.length
-    ? await api(`colors?select=*&id=in.(${colorIds.join(",")})`)
-    : []
-  const colorMap: Record<number, any> = {}
-  for (const c of colors) colorMap[c.id] = c
+    const colorIds = Array.from(new Set(variants.map((v: any) => v.color_id).filter(Boolean)))
+    const colors = colorIds.length
+      ? await api(`colors?select=*&id=in.(${colorIds.join(",")})`)
+      : []
+    const colorMap: Record<number, any> = {}
+    for (const c of colors) colorMap[c.id] = c
 
-  const variantIds = variants.map((v: any) => v.id)
-  const images = variantIds.length
-    ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})`)
-    : []
+    const variantIds = variants.map((v: any) => v.id)
+    const images = variantIds.length
+      ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})`)
+      : []
 
-  const variantImages: Record<number, any[]> = {}
-  for (const img of images) {
-    if (!variantImages[img.variant_id]) variantImages[img.variant_id] = []
-    variantImages[img.variant_id].push(img)
+    const variantImages: Record<number, any[]> = {}
+    for (const img of images) {
+      if (!variantImages[img.variant_id]) variantImages[img.variant_id] = []
+      variantImages[img.variant_id].push(img)
+    }
+
+    const enrichedVariants = variants.map((v: any) => ({
+      ...v,
+      colors: colorMap[v.color_id] || null,
+      images: (variantImages[v.id] || []).sort((a: any, b: any) => a.orden - b.orden),
+    }))
+
+    return (
+      <ProductDetail
+        product={{
+          ...product,
+          categories: product.categories || null,
+        }}
+        variants={enrichedVariants}
+      />
+    )
+  } catch {
+    notFound()
   }
-
-  const enrichedVariants = variants.map((v: any) => ({
-    ...v,
-    colors: colorMap[v.color_id] || null,
-    images: (variantImages[v.id] || []).sort((a: any, b: any) => a.orden - b.orden),
-  }))
-
-  return (
-    <ProductDetail
-      product={{
-        ...product,
-        categories: product.categories || null,
-      }}
-      variants={enrichedVariants}
-    />
-  )
 }
