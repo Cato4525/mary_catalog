@@ -31,7 +31,7 @@ export default async function AdminTiposPage() {
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200">
+      <div className="hidden overflow-x-auto rounded-xl border border-gray-200 sm:block">
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-50 text-xs uppercase text-gray-500">
             <tr>
@@ -85,6 +85,49 @@ export default async function AdminTiposPage() {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="space-y-3 sm:hidden">
+        {(types || []).length > 0 ? (
+          (types || []).map((type) => (
+            <div key={type.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="font-medium text-gray-900">{type.nombre}</span>
+                <span className="text-xs text-gray-400">
+                  {new Date(type.created_at).toLocaleDateString("es")}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Link
+                  href={`/admin/tipos/${type.id}`}
+                  className="flex-1 rounded-lg bg-gray-100 py-2.5 text-center text-sm font-medium text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97]"
+                >
+                  Editar
+                </Link>
+                <form action={async (formData) => {
+                  "use server"
+                  const { deleteTipo } = await import("./actions")
+                  await deleteTipo(formData)
+                }} className="flex-1">
+                  <input type="hidden" name="id" value={type.id} />
+                  <button
+                    type="submit"
+                    onClick={(e) => {
+                      if (!confirm("¿Eliminar este tipo?")) e.preventDefault()
+                    }}
+                    className="w-full rounded-lg bg-red-50 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-100 active:scale-[0.97]"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="rounded-xl border border-gray-200 bg-white p-12 text-center text-gray-400">
+            No hay tipos de producto
+          </div>
+        )}
       </div>
     </div>
   )

@@ -35,7 +35,7 @@ export default function ProductDetail({
   const colorHex = selectedVariant?.colors?.hex || null
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2 md:gap-8">
       <ProductGallery images={images} productName={product.nombre} />
 
       <div className="space-y-4">
@@ -46,7 +46,7 @@ export default function ProductDetail({
                 {product.codigo}
               </span>
             )}
-            <h1 className="break-words text-3xl font-bold text-gray-900">
+            <h1 className="break-words text-2xl font-bold text-gray-900 sm:text-3xl">
               {product.nombre}
             </h1>
           </div>

@@ -135,23 +135,31 @@ export default async function Home({
       </div>
 
       {/* DESKTOP: Grid with sidebar */}
-      <div className="mx-auto hidden max-w-7xl px-4 py-6 sm:block">
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Mary</h1>
+      <div className="hidden sm:block">
+        <div className="mx-auto max-w-7xl px-4 py-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h1 className="text-xl font-bold text-gray-900">Mary</h1>
+          </div>
         </div>
 
-        <CatalogHeader
-          categories={categories as any[]}
-          productTypes={productTypes as any[]}
-        />
-
-        <div className="mt-4 flex gap-4">
-          <div className="sticky top-20 h-[calc(100vh-6rem)]">
-            <ColorSidebar colors={availableColors} />
+        <div className="sticky top-14 z-20 border-b border-gray-100 bg-white/95 backdrop-blur-sm">
+          <div className="mx-auto max-w-7xl px-4 py-3">
+            <CatalogHeader
+              categories={categories as any[]}
+              productTypes={productTypes as any[]}
+            />
           </div>
+        </div>
 
-          <div className="min-w-0 flex-1">
-            <ProductGrid products={filteredProducts} />
+        <div className="mx-auto max-w-7xl px-4 py-4">
+          <div className="flex gap-4">
+            <div className="sticky top-[8.5rem] h-[calc(100vh-10rem)]">
+              <ColorSidebar colors={availableColors} />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <ProductGrid products={filteredProducts} />
+            </div>
           </div>
         </div>
       </div>

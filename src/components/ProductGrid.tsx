@@ -34,6 +34,8 @@ export default function ProductGrid({ products }: ProductGridProps) {
             key={product.id}
             product={product}
             colors={product.colors}
+            isFavorite={isFavorite(product.id)}
+            onToggleFavorite={() => toggle(product.id)}
           />
         ))}
       </div>

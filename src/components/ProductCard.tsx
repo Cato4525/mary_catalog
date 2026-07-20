@@ -70,10 +70,17 @@ export default function ProductCard({
         )}
 
         {/* Counter - top left */}
-        <div className="absolute left-4 top-4 z-10">
+        <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
           <span className="rounded-full bg-black/40 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
             {index + 1} / {total}
           </span>
+          {isFavorite && (
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500/30 backdrop-blur-sm">
+              <svg className="h-4 w-4 fill-red-500 text-red-500" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </div>
+          )}
         </div>
 
         {/* Gallery dots - top center */}
@@ -168,7 +175,7 @@ export default function ProductCard({
           alt={product.nombre}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, 50vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           unoptimized
         />
 
@@ -180,6 +187,42 @@ export default function ProductCard({
               Agotado
             </span>
           </div>
+        )}
+
+        {onToggleFavorite && (
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onToggleFavorite()
+            }}
+            className="absolute right-3 top-3 z-10"
+          >
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${
+                isFavorite
+                  ? "bg-red-500/20 shadow-lg"
+                  : "bg-white/10 backdrop-blur-sm hover:bg-white/20"
+              }`}
+            >
+              <svg
+                className={`h-5 w-5 transition-all ${
+                  isFavorite
+                    ? "fill-red-500 text-red-500 scale-110"
+                    : "fill-none text-white hover:scale-110"
+                }`}
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+            </div>
+          </button>
         )}
 
         <div className="absolute bottom-0 left-0 right-0 p-4">

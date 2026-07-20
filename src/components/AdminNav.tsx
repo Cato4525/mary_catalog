@@ -92,7 +92,7 @@ export default function AdminNav({ hasSession }: { hasSession: boolean }) {
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t border-gray-200 bg-white md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-around border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom,0px)] md:hidden">
         {LINKS.map((link) => (
           <Link
             key={link.href}
@@ -130,7 +130,7 @@ export default function AdminNav({ hasSession }: { hasSession: boolean }) {
       </nav>
 
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-gray-200 bg-white shadow-sm md:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-gray-200 bg-white shadow-sm lg:flex">
         <div className="flex h-14 items-center border-b border-gray-200 px-6">
           <Link href="/admin" className="text-base font-semibold text-gray-900">
             Mary Leggings

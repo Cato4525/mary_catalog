@@ -342,7 +342,7 @@ export default function VariantManager({ productId, initialVariants, allColors }
                 variant.disponible ? "border-gray-200" : "border-gray-200 opacity-60"
               }`}
             >
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col gap-0.5">
                     <button
