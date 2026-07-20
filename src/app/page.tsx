@@ -120,7 +120,16 @@ export default async function Home({
   return (
     <>
       {/* MOBILE: Full-screen TikTok scroll */}
-      <div className="sm:hidden">
+      <div className="relative sm:hidden">
+        <div className="absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-black/60 via-black/30 to-transparent pt-14 pb-8">
+          <div className="px-3">
+            <CatalogHeader
+              categories={categories as any[]}
+              productTypes={productTypes as any[]}
+            />
+          </div>
+        </div>
+
         {filteredProducts.length > 0 ? (
           <ProductGrid products={filteredProducts} />
         ) : (

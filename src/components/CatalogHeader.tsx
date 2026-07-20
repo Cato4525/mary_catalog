@@ -81,7 +81,7 @@ export default function CatalogHeader({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <div className="relative flex-1">
           <svg
             className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
@@ -93,20 +93,20 @@ export default function CatalogHeader({
           </svg>
           <input
             type="text"
-            placeholder="Buscar por nombre, código o color..."
+            placeholder="Buscar..."
             defaultValue={currentQ}
             onChange={(e) => handleSearch(e.target.value)}
             aria-label="Buscar productos"
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+            className="w-full rounded-xl border border-white/20 bg-white/90 py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 backdrop-blur-sm transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100 sm:border-gray-200 sm:bg-gray-50 sm:py-3"
           />
         </div>
 
         <button
           onClick={() => toggleFilter("categoria")}
-          className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium backdrop-blur-sm transition-all sm:px-4 sm:py-3 ${
             currentCategoria
-              ? "border-primary-300 bg-primary-50 text-primary-700"
-              : "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100"
+              ? "border-primary-300 bg-primary-50/90 text-primary-700"
+              : "border-white/20 bg-white/90 text-gray-600 hover:border-gray-300 hover:bg-white sm:border-gray-200 sm:bg-gray-50"
           }`}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,10 +117,10 @@ export default function CatalogHeader({
 
         <button
           onClick={() => toggleFilter("tipo")}
-          className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium backdrop-blur-sm transition-all sm:px-4 sm:py-3 ${
             currentTipo
-              ? "border-primary-300 bg-primary-50 text-primary-700"
-              : "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100"
+              ? "border-primary-300 bg-primary-50/90 text-primary-700"
+              : "border-white/20 bg-white/90 text-gray-600 hover:border-gray-300 hover:bg-white sm:border-gray-200 sm:bg-gray-50"
           }`}
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@ export default function CatalogHeader({
       </div>
 
       {openFilter === "categoria" && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[50vh] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
           <button
             onClick={() => handleCategoria("")}
             className={`w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
@@ -157,7 +157,7 @@ export default function CatalogHeader({
       )}
 
       {openFilter === "tipo" && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[50vh] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
           <button
             onClick={() => handleTipo("")}
             className={`w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
@@ -184,7 +184,7 @@ export default function CatalogHeader({
 
       {(openFilter === "categoria" || openFilter === "tipo") && (
         <div
-          className="fixed inset-0 z-10"
+          className="fixed inset-0 z-40"
           onClick={() => setOpenFilter("none")}
         />
       )}

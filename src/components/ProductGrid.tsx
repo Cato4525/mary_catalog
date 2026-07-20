@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useFavorites } from "@/hooks/useFavorites"
 import ProductCard from "./ProductCard"
 
@@ -8,7 +9,13 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ products }: ProductGridProps) {
-  const { toggle, isFavorite } = useFavorites()
+  const { toggle, isFavorite, getCount, fetchCounts, initialized } = useFavorites()
+
+  useEffect(() => {
+    if (initialized) {
+      fetchCounts(products.map((p: any) => p.id))
+    }
+  }, [initialized, products, fetchCounts])
 
   return (
     <>
@@ -20,6 +27,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
             product={product}
             colors={product.colors}
             isFavorite={isFavorite(product.id)}
+            likeCount={getCount(product.id)}
             onToggleFavorite={() => toggle(product.id)}
             index={index}
             total={products.length}
@@ -35,6 +43,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
             product={product}
             colors={product.colors}
             isFavorite={isFavorite(product.id)}
+            likeCount={getCount(product.id)}
             onToggleFavorite={() => toggle(product.id)}
           />
         ))}

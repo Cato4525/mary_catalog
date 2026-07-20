@@ -2,39 +2,100 @@
 
 import { useCallback, useEffect, useState } from "react"
 
-const STORAGE_KEY = "mary-favorites"
+const VISITOR_KEY = "mary-visitor-id"
+const LIKED_KEY = "mary-liked"
+
+function getVisitorId(): string {
+  try {
+    let id = localStorage.getItem(VISITOR_KEY)
+    if (!id) {
+      id = crypto.randomUUID()
+      localStorage.setItem(VISITOR_KEY, id)
+    }
+    return id
+  } catch {
+    return "anonymous"
+  }
+}
+
+function getLikedIds(): Set<number> {
+  try {
+    const stored = localStorage.getItem(LIKED_KEY)
+    if (stored) return new Set(JSON.parse(stored))
+  } catch {}
+  return new Set()
+}
+
+function saveLikedIds(ids: Set<number>) {
+  try {
+    localStorage.setItem(LIKED_KEY, JSON.stringify(Array.from(ids)))
+  } catch {}
+}
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [likedIds, setLikedIds] = useState<Set<number>>(new Set())
+  const [likeCounts, setLikeCounts] = useState<Record<number, number>>({})
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
+    setLikedIds(getLikedIds())
+    setInitialized(true)
+  }, [])
+
+  const fetchCounts = useCallback(async (productIds: number[]) => {
+    if (productIds.length === 0) return
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        setFavorites(new Set(JSON.parse(stored)))
+      const res = await fetch(`/api/likes?ids=${productIds.join(",")}`)
+      if (res.ok) {
+        const counts = await res.json()
+        setLikeCounts(counts)
       }
     } catch {}
   }, [])
 
-  const toggle = useCallback((productId: number) => {
-    setFavorites((prev) => {
+  const toggle = useCallback(async (productId: number) => {
+    const visitorId = getVisitorId()
+
+    setLikedIds((prev) => {
       const next = new Set(prev)
-      if (next.has(productId)) {
+      const wasLiked = next.has(productId)
+      if (wasLiked) {
         next.delete(productId)
       } else {
         next.add(productId)
       }
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)))
-      } catch {}
+      saveLikedIds(next)
+
+      setLikeCounts((prev) => ({
+        ...prev,
+        [productId]: Math.max(0, (prev[productId] || 0) + (wasLiked ? -1 : 1)),
+      }))
+
       return next
     })
+
+    try {
+      const res = await fetch("/api/likes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: productId, visitor_id: visitorId }),
+      })
+      if (res.ok) {
+        const { count } = await res.json()
+        setLikeCounts((prev) => ({ ...prev, [productId]: count }))
+      }
+    } catch {}
   }, [])
 
   const isFavorite = useCallback(
-    (productId: number) => favorites.has(productId),
-    [favorites]
+    (productId: number) => likedIds.has(productId),
+    [likedIds]
   )
 
-  return { favorites, toggle, isFavorite }
+  const getCount = useCallback(
+    (productId: number) => likeCounts[productId] || 0,
+    [likeCounts]
+  )
+
+  return { likedIds, toggle, isFavorite, getCount, fetchCounts, initialized }
 }
