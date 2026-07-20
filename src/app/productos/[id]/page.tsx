@@ -20,11 +20,18 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const product = products[0]
   if (!product) notFound()
 
-  const variants = await api(`product_variants?select=*,colors(nombre,hex)&product_id=eq.${params.id}&order=orden.asc`)
+  const variants = await api(`product_variants?select=*&product_id=eq.${params.id}&order=orden.asc`)
+
+  const colorIds = Array.from(new Set(variants.map((v: any) => v.color_id).filter(Boolean)))
+  const colors = colorIds.length
+    ? await api(`colors?select=*&id=in.(${colorIds.join(",")})`)
+    : []
+  const colorMap: Record<number, any> = {}
+  for (const c of colors) colorMap[c.id] = c
 
   const variantIds = variants.map((v: any) => v.id)
   const images = variantIds.length
-    ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})&orden.asc`)
+    ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})`)
     : []
 
   const variantImages: Record<number, any[]> = {}
@@ -35,7 +42,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
   const enrichedVariants = variants.map((v: any) => ({
     ...v,
-    images: variantImages[v.id] || [],
+    colors: colorMap[v.color_id] || null,
+    images: (variantImages[v.id] || []).sort((a: any, b: any) => a.orden - b.orden),
   }))
 
   return (

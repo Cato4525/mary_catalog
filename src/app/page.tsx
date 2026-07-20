@@ -1,6 +1,6 @@
 import CatalogHeader from "@/components/CatalogHeader"
-import ColorFilter from "@/components/ColorFilter"
-import ProductCard from "@/components/ProductCard"
+import ColorSidebar from "@/components/ColorSidebar"
+import ProductGrid from "@/components/ProductGrid"
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
 
@@ -44,14 +44,15 @@ export default async function Home({
   const variantIds = (allVariants as any[]).map((v: any) => v.id)
 
   const allImages = variantIds.length
-    ? await api(`product_images?select=variant_id,url&variant_id=in.(${variantIds.join(",")})`)
+    ? await api(`product_images?select=variant_id,url,sort_order&variant_id=in.(${variantIds.join(",")})`)
     : []
 
-  const firstImageByVariant: Record<number, string> = {}
+  const imagesByProduct: Record<number, string[]> = {}
   for (const img of (allImages as any[])) {
-    if (!firstImageByVariant[img.variant_id]) {
-      firstImageByVariant[img.variant_id] = img.url
-    }
+    const variant = (allVariants as any[]).find((v: any) => v.id === img.variant_id)
+    if (!variant) continue
+    if (!imagesByProduct[variant.product_id]) imagesByProduct[variant.product_id] = []
+    imagesByProduct[variant.product_id].push(img.url)
   }
 
   const variantsByProduct: Record<number, any[]> = {}
@@ -60,11 +61,14 @@ export default async function Home({
     variantsByProduct[v.product_id].push(v)
   }
 
+  const availableColorIds = new Set((allVariants as any[]).map((v: any) => v.color_id))
+  const availableColors = (colors as any[]).filter((c: any) => availableColorIds.has(c.id))
+
   let filteredProducts = (products as any[])
     .map((p: any) => {
       const variants = variantsByProduct[p.id] || []
-      const firstVariant = variants[0]
-      const firstImage = firstVariant ? firstImageByVariant[firstVariant.id] || "" : ""
+      const allProductImages = imagesByProduct[p.id] || []
+      const firstImage = allProductImages[0] || ""
       const colorNames = variants
         .map((v: any) => {
           const color = (colors as any[]).find((c: any) => c.id === v.color_id)
@@ -74,6 +78,7 @@ export default async function Home({
       return {
         ...p,
         imagen_url: firstImage || PLACEHOLDER,
+        images: allProductImages.length > 0 ? allProductImages : [firstImage || PLACEHOLDER],
         colors: variants.map((v: any) => ({
           id: v.color_id,
           color: (colors as any[]).find((c: any) => c.id === v.color_id)?.nombre || "",
@@ -113,27 +118,13 @@ export default async function Home({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Mary</h1>
-      </div>
-
-      <CatalogHeader
-        categories={categories as any[]}
-        productTypes={productTypes as any[]}
-      />
-
-      <div className="mt-4">
-        <ColorFilter colors={colors as any[]} />
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+    <>
+      {/* MOBILE: Full-screen TikTok scroll */}
+      <div className="sm:hidden">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map((product: any) => (
-            <ProductCard key={product.id} product={product} colors={product.colors} />
-          ))
+          <ProductGrid products={filteredProducts} />
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
+          <div className="flex h-[100dvh] flex-col items-center justify-center text-gray-400">
             <svg className="mb-3 h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -142,6 +133,28 @@ export default async function Home({
           </div>
         )}
       </div>
-    </div>
+
+      {/* DESKTOP: Grid with sidebar */}
+      <div className="mx-auto hidden max-w-7xl px-4 py-6 sm:block">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900">Mary</h1>
+        </div>
+
+        <CatalogHeader
+          categories={categories as any[]}
+          productTypes={productTypes as any[]}
+        />
+
+        <div className="mt-4 flex gap-4">
+          <div className="sticky top-20 h-[calc(100vh-6rem)]">
+            <ColorSidebar colors={availableColors} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <ProductGrid products={filteredProducts} />
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
