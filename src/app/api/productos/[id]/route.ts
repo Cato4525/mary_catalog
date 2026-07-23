@@ -23,6 +23,8 @@ export async function PATCH(
     const disponible = formData.get("disponible") !== "false"
     const destacado = formData.get("destacado") === "true"
 
+    const sizeIdsRaw = formData.get("size_ids") as string | null
+
     if (!nombre) {
       return NextResponse.json(
         { error: "Nombre es requerido" },
@@ -49,9 +51,22 @@ export async function PATCH(
       return NextResponse.json({ error: productError.message }, { status: 500 })
     }
 
+    if (sizeIdsRaw) {
+      const sizeIds: number[] = JSON.parse(sizeIdsRaw)
+      await supabaseAdmin.from("product_sizes").delete().eq("product_id", productId)
+      if (sizeIds.length > 0) {
+        const sizeRows = sizeIds.map((size_id) => ({
+          product_id: productId,
+          size_id,
+          activo: true,
+        }))
+        await supabaseAdmin.from("product_sizes").upsert(sizeRows, { onConflict: "product_id,size_id" })
+      }
+    }
+
     revalidatePath("/")
     revalidatePath("/admin/productos")
-    revalidatePath(`/productos/${productId}`)
+    revalidatePath(`/admin/productos/${productId}`)
     return NextResponse.json({ id: productId })
   } catch (err) {
     return NextResponse.json(

@@ -1,12 +1,14 @@
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
-import type { Category, ProductType } from "@/lib/types"
+import type { Category, ProductType, Color, Size } from "@/lib/types"
 import ProductForm from "../ProductForm"
 
 export default async function NuevoProductoPage() {
-  const [categoriesResult, typesResult] = await Promise.all([
+  const [categoriesResult, typesResult, colorsResult, sizesResult] = await Promise.all([
     supabase.from("categories").select("*").order("nombre"),
     supabase.from("product_types").select("*").order("nombre"),
+    supabase.from("colors").select("*").eq("activo", true).order("nombre"),
+    supabase.from("sizes").select("*").order("nombre"),
   ])
 
   return (
@@ -24,6 +26,8 @@ export default async function NuevoProductoPage() {
       <ProductForm
         categories={(categoriesResult.data as Category[]) || []}
         productTypes={(typesResult.data as ProductType[]) || []}
+        allColors={(colorsResult.data as Color[]) || []}
+        allSizes={(sizesResult.data as Size[]) || []}
       />
     </div>
   )

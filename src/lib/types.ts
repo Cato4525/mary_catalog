@@ -54,6 +54,22 @@ export interface Product {
   variants?: ProductVariant[]
 }
 
+export interface Size {
+  id: number
+  nombre: string
+  activo: boolean
+  created_at: string
+}
+
+export interface ProductSize {
+  id: number
+  product_id: number
+  size_id: number
+  activo: boolean
+  created_at: string
+  sizes?: Size | null
+}
+
 export interface StoreSettings {
   id: number
   store_name: string

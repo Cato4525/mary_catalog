@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import type { Category, ProductType } from "@/lib/types"
+import type { Category, ProductType, Color, Size } from "@/lib/types"
 import ProductForm from "../ProductForm"
 
 export default async function EditarProductoPage({
@@ -11,13 +11,59 @@ export default async function EditarProductoPage({
 }) {
   const productId = Number(params.id)
 
-  const [productResult, categoriesResult, typesResult] = await Promise.all([
+  const [
+    productResult,
+    categoriesResult,
+    typesResult,
+    colorsResult,
+    sizesResult,
+    productSizesResult,
+    variantsResult,
+  ] = await Promise.all([
     supabase.from("products").select("*").eq("id", productId).single(),
     supabase.from("categories").select("*").order("nombre"),
     supabase.from("product_types").select("*").order("nombre"),
+    supabase.from("colors").select("*").eq("activo", true).order("nombre"),
+    supabase.from("sizes").select("*").order("nombre"),
+    supabase.from("product_sizes").select("size_id").eq("product_id", productId),
+    supabase.from("product_variants").select("*").eq("product_id", productId).order("orden"),
   ])
 
   if (!productResult.data) notFound()
+
+  const variantIds = (variantsResult.data || []).map((v) => v.id)
+
+  const imagesResult = variantIds.length > 0
+    ? await supabase
+        .from("product_images")
+        .select("*")
+        .in("variant_id", variantIds)
+        .order("sort_order")
+    : { data: [] }
+
+  const colorIds = Array.from(new Set((variantsResult.data || []).map((v: any) => v.color_id)))
+  const colorsData = colorIds.length > 0
+    ? await supabase.from("colors").select("*").in("id", colorIds)
+    : { data: [] }
+
+  const imagesByVariant: Record<number, any[]> = {}
+  for (const img of imagesResult.data || []) {
+    if (!imagesByVariant[img.variant_id]) imagesByVariant[img.variant_id] = []
+    imagesByVariant[img.variant_id].push(img)
+  }
+
+  const colorMap: Record<number, any> = {}
+  for (const c of colorsData.data || []) {
+    colorMap[c.id] = c
+  }
+
+  const variantsWithImages = (variantsResult.data || []).map((v) => ({
+    ...v,
+    color: colorMap[v.color_id],
+    images: imagesByVariant[v.id] || [],
+  }))
+
+  const productSizesIds = (productSizesResult.data || []).map((ps) => ps.size_id)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -46,6 +92,10 @@ export default async function EditarProductoPage({
         product={productResult.data as any}
         categories={(categoriesResult.data as Category[]) || []}
         productTypes={(typesResult.data as ProductType[]) || []}
+        allColors={(colorsResult.data as Color[]) || []}
+        allSizes={(sizesResult.data as Size[]) || []}
+        productSizes={productSizesIds}
+        productVariants={variantsWithImages as any}
       />
     </div>
   )
