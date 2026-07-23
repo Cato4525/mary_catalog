@@ -353,7 +353,7 @@ export default function ProductForm({ product, categories, productTypes, allColo
         id: Date.now() + i,
         variant_id: variantId,
         url,
-        sort_order: (variants.find((v) => v.id === variantId)?.images.length || 0) + i,
+        sort_order: (variants.find((v) => v.id === variantId)?.images?.length ?? 0) + i,
         created_at: new Date().toISOString(),
       }))
 

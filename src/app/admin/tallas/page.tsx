@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { toggleSize, deleteSize } from "./actions"
+import ConfirmDeleteButton from "@/components/ConfirmDeleteButton"
 
 export const dynamic = "force-dynamic"
 
@@ -79,15 +80,12 @@ export default async function AdminTallasPage() {
                         await deleteSize(formData)
                       }}>
                         <input type="hidden" name="id" value={size.id} />
-                        <button
-                          type="submit"
-                          onClick={(e) => {
-                            if (!confirm("¿Eliminar esta talla?")) e.preventDefault()
-                          }}
+                        <ConfirmDeleteButton
+                          message="¿Eliminar esta talla?"
                           className="rounded-lg bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-100 active:scale-[0.97]"
                         >
                           Eliminar
-                        </button>
+                        </ConfirmDeleteButton>
                       </form>
                     </div>
                   </td>
@@ -137,15 +135,12 @@ export default async function AdminTallasPage() {
                   await deleteSize(formData)
                 }} className="flex-1">
                   <input type="hidden" name="id" value={size.id} />
-                  <button
-                    type="submit"
-                    onClick={(e) => {
-                      if (!confirm("¿Eliminar esta talla?")) e.preventDefault()
-                    }}
+                  <ConfirmDeleteButton
+                    message="¿Eliminar esta talla?"
                     className="w-full rounded-lg bg-red-50 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-100 active:scale-[0.97]"
                   >
                     Eliminar
-                  </button>
+                  </ConfirmDeleteButton>
                 </form>
               </div>
             </div>
