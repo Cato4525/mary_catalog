@@ -5,8 +5,6 @@ import ProductGallery from "./ProductGallery"
 import ProductWhatsAppButton from "@/components/ProductWhatsAppButton"
 import AddToCartButton from "@/components/AddToCartButton"
 
-const SIZES = ["S", "M", "L", "XL"]
-
 interface Variant {
   id: number
   color_id: number
@@ -18,12 +16,14 @@ interface Variant {
 interface Props {
   product: any
   variants: Variant[]
+  sizes?: string[]
   whatsapp?: string
 }
 
 export default function ProductDetail({
   product,
   variants,
+  sizes = [],
   whatsapp,
 }: Props) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
@@ -115,21 +115,23 @@ export default function ProductDetail({
           </p>
         )}
 
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Tallas disponibles
-          </label>
-          <div className="flex items-center gap-3 text-sm text-gray-600">
-            {SIZES.map((size) => (
-              <span
-                key={size}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium"
-              >
-                {size}
-              </span>
-            ))}
+        {sizes.length > 0 && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Tallas disponibles
+            </label>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+              {sizes.map((size) => (
+                <span
+                  key={size}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium"
+                >
+                  {size}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {selectedVariant && (
           <AddToCartButton

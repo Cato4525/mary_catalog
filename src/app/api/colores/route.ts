@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache"
 
 export async function GET() {
   try {
-    const { data: sizes, error } = await supabaseAdmin
-      .from("sizes")
+    const { data: colors, error } = await supabaseAdmin
+      .from("colors")
       .select("*")
       .order("nombre")
 
@@ -13,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(sizes)
+    return NextResponse.json(colors)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Error interno" },
@@ -25,15 +25,15 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { nombre } = body
+    const { nombre, codigo_hex } = body
 
     if (!nombre?.trim()) {
       return NextResponse.json({ error: "Nombre es requerido" }, { status: 400 })
     }
 
-    const { data: size, error } = await supabaseAdmin
-      .from("sizes")
-      .insert({ nombre: nombre.trim() })
+    const { data: color, error } = await supabaseAdmin
+      .from("colors")
+      .insert({ nombre: nombre.trim(), codigo_hex: codigo_hex || "#808080" })
       .select()
       .single()
 
@@ -41,8 +41,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    revalidatePath("/admin/tallas")
-    return NextResponse.json(size)
+    revalidatePath("/admin/colores")
+    return NextResponse.json(color)
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Error interno" },
@@ -54,14 +54,13 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json()
-    const { id, nombre, activo } = body
+    const { id, activo } = body
 
     if (!id) {
       return NextResponse.json({ error: "id es requerido" }, { status: 400 })
     }
 
     const update: Record<string, unknown> = {}
-    if (nombre?.trim()) update.nombre = nombre.trim()
     if (typeof activo === "boolean") update.activo = activo
 
     if (Object.keys(update).length === 0) {
@@ -69,7 +68,7 @@ export async function PATCH(request: Request) {
     }
 
     const { error } = await supabaseAdmin
-      .from("sizes")
+      .from("colors")
       .update(update)
       .eq("id", Number(id))
 
@@ -77,7 +76,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    revalidatePath("/admin/tallas")
+    revalidatePath("/admin/colores")
     return NextResponse.json({ ok: true })
   } catch (err) {
     return NextResponse.json(
@@ -97,7 +96,7 @@ export async function DELETE(request: Request) {
     }
 
     const { error } = await supabaseAdmin
-      .from("sizes")
+      .from("colors")
       .delete()
       .eq("id", Number(id))
 
@@ -105,7 +104,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    revalidatePath("/admin/tallas")
+    revalidatePath("/admin/colores")
     return NextResponse.json({ ok: true })
   } catch (err) {
     return NextResponse.json(

@@ -47,6 +47,11 @@ export default async function ProductPage({ params }: { params: { id: string } }
       images: (variantImages[v.id] || []).sort((a: any, b: any) => a.orden - b.orden),
     }))
 
+    const productSizesData = await api(`product_sizes?select=sizes(nombre)&product_id=eq.${params.id}`)
+    const sizeNames = productSizesData
+      .map((ps: any) => ps.sizes?.nombre)
+      .filter(Boolean)
+
     return (
       <ProductDetail
         product={{
@@ -54,6 +59,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
           categories: product.categories || null,
         }}
         variants={enrichedVariants}
+        sizes={sizeNames}
       />
     )
   } catch {

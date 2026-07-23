@@ -93,10 +93,26 @@ export default function ProductForm({ product, categories, productTypes, allColo
   const [colorSelections, setColorSelections] = useState<ColorSelection[]>([])
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
+  const isEdit = !!product
+
+  const [variants, setVariants] = useState<VariantWithImages[]>(productVariants)
+  const [colors, setColors] = useState<Color[]>(allColors)
+  const [sizes, setSizes] = useState<Size[]>(allSizes)
+  const [uploading, setUploading] = useState<Record<number, boolean>>({})
+
+  const [showNewColor, setShowNewColor] = useState(false)
+  const [newColorName, setNewColorName] = useState("")
+  const [newColorHex, setNewColorHex] = useState("#808080")
+  const [creatingColor, setCreatingColor] = useState(false)
+
+  const [showNewSize, setShowNewSize] = useState(false)
+  const [newSizeName, setNewSizeName] = useState("")
+  const [creatingSize, setCreatingSize] = useState(false)
+
   const usedColorIds = new Set(
-    product ? productVariants.map((v) => v.color_id) : colorSelections.map((cs) => cs.colorId)
+    isEdit ? variants.map((v) => v.color_id) : colorSelections.map((cs) => cs.colorId)
   )
-  const availableColors = allColors.filter((c) => c.activo && !usedColorIds.has(c.id))
+  const availableColors = colors.filter((c) => c.activo && !usedColorIds.has(c.id))
 
   const addColorSelection = (colorId: number) => {
     setColorSelections((prev) => [...prev, { colorId, files: [], previews: [] }])
@@ -158,6 +174,219 @@ export default function ProductForm({ product, categories, productTypes, allColo
     setSelectedSizes((prev) =>
       prev.includes(sizeId) ? prev.filter((id) => id !== sizeId) : [...prev, sizeId]
     )
+  }
+
+  const handleCreateColor = async () => {
+    if (!newColorName.trim()) return
+    setCreatingColor(true)
+    setError("")
+
+    try {
+      const res = await fetch("/api/colores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: newColorName.trim(), codigo_hex: newColorHex }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Error al crear color")
+      }
+
+      const newColor = await res.json()
+      setColors((prev) => [...prev, newColor])
+      setNewColorName("")
+      setNewColorHex("#808080")
+      setShowNewColor(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al crear color")
+    } finally {
+      setCreatingColor(false)
+    }
+  }
+
+  const handleCreateSize = async () => {
+    if (!newSizeName.trim()) return
+    setCreatingSize(true)
+    setError("")
+
+    try {
+      const res = await fetch("/api/tallas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: newSizeName.trim() }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Error al crear talla")
+      }
+
+      const newSize = await res.json()
+      setSizes((prev) => [...prev, newSize])
+      setSelectedSizes((prev) => [...prev, newSize.id])
+      setNewSizeName("")
+      setShowNewSize(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al crear talla")
+    } finally {
+      setCreatingSize(false)
+    }
+  }
+
+  const handleDeleteSize = async (sizeId: number) => {
+    if (!confirm("¿Eliminar esta talla?")) return
+
+    try {
+      await fetch(`/api/tallas?id=${sizeId}`, { method: "DELETE" })
+      setSizes((prev) => prev.filter((s) => s.id !== sizeId))
+      setSelectedSizes((prev) => prev.filter((id) => id !== sizeId))
+    } catch {
+      setError("Error al eliminar talla")
+    }
+  }
+
+  const handleToggleSizeActive = async (sizeId: number, current: boolean) => {
+    try {
+      await fetch("/api/tallas", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: sizeId, activo: !current }),
+      })
+      setSizes((prev) =>
+        prev.map((s) => (s.id === sizeId ? { ...s, activo: !s.activo } : s))
+      )
+    } catch {
+      setError("Error al actualizar talla")
+    }
+  }
+
+  const handleAddEditVariant = async (colorId: number) => {
+    if (!product) return
+    setError("")
+
+    try {
+      const res = await fetch("/api/variantes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ product_id: product.id, color_id: colorId }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Error al agregar variante")
+      }
+
+      const newVariant = await res.json()
+      const color = colors.find((c) => c.id === colorId) || null
+
+      setVariants((prev) => [
+        ...prev,
+        { ...newVariant, color, images: [] },
+      ])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error")
+    }
+  }
+
+  const handleDeleteEditVariant = async (variantId: number) => {
+    if (!confirm("¿Eliminar este color y todas sus imágenes?")) return
+
+    try {
+      await fetch(`/api/variantes/${variantId}`, { method: "DELETE" })
+      setVariants((prev) => prev.filter((v) => v.id !== variantId))
+    } catch {
+      setError("Error al eliminar")
+    }
+  }
+
+  const handleToggleEditVariant = async (variantId: number, current: boolean) => {
+    try {
+      await fetch(`/api/variantes/${variantId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disponible: !current }),
+      })
+      setVariants((prev) =>
+        prev.map((v) => (v.id === variantId ? { ...v, disponible: !v.disponible } : v))
+      )
+    } catch {
+      setError("Error al actualizar")
+    }
+  }
+
+  const handleUploadEditImages = async (variantId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading((prev) => ({ ...prev, [variantId]: true }))
+    setError("")
+
+    try {
+      const fd = new FormData()
+      for (const file of Array.from(files)) {
+        if (!ACCEPTED.includes(file.type)) {
+          setError(`Formato no soportado: ${file.type}`)
+          continue
+        }
+        if (file.size > MAX_SIZE) {
+          setError(`Archivo muy pesado: ${file.name} (máx 5 MB)`)
+          continue
+        }
+        const compressed = await compressImage(file)
+        fd.append("files", compressed)
+      }
+
+      const res = await fetch(`/api/variantes/${variantId}/images`, {
+        method: "POST",
+        body: fd,
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error || "Error al subir imágenes")
+      }
+
+      const { urls } = await res.json()
+
+      const newImages = urls.map((url: string, i: number) => ({
+        id: Date.now() + i,
+        variant_id: variantId,
+        url,
+        sort_order: (variants.find((v) => v.id === variantId)?.images.length || 0) + i,
+        created_at: new Date().toISOString(),
+      }))
+
+      setVariants((prev) =>
+        prev.map((v) =>
+          v.id === variantId ? { ...v, images: [...v.images, ...newImages] } : v
+        )
+      )
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al subir")
+    } finally {
+      setUploading((prev) => ({ ...prev, [variantId]: false }))
+      e.target.value = ""
+    }
+  }
+
+  const handleDeleteEditImage = async (variantId: number, imageId: number) => {
+    if (!confirm("¿Eliminar esta imagen?")) return
+
+    try {
+      await fetch(`/api/variantes/${variantId}/images?imageId=${imageId}`, {
+        method: "DELETE",
+      })
+      setVariants((prev) =>
+        prev.map((v) =>
+          v.id === variantId
+            ? { ...v, images: v.images.filter((img) => img.id !== imageId) }
+            : v
+        )
+      )
+    } catch {
+      setError("Error al eliminar imagen")
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -318,38 +547,92 @@ export default function ProductForm({ product, categories, productTypes, allColo
         />
       </div>
 
-      {!product && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <p className="mb-2 text-sm font-medium text-blue-800">Colores e Imágenes</p>
-          <p className="mb-3 text-xs text-blue-600">
-            Selecciona los colores disponibles y sube las fotos para cada uno.
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-medium text-blue-800">
+            Colores e Imágenes ({isEdit ? variants.length : colorSelections.length})
           </p>
-          {availableColors.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {availableColors.map((color) => (
-                <button
-                  key={color.id}
-                  type="button"
-                  onClick={() => addColorSelection(color.id)}
-                  className="flex items-center gap-2 rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:border-primary-400 hover:bg-primary-50 active:scale-[0.97]"
-                >
-                  <span
-                    className="h-5 w-5 rounded-full border border-gray-300 shadow-inner"
-                    style={{ backgroundColor: color.codigo_hex }}
-                  />
-                  + {color.nombre}
-                </button>
-              ))}
+          <button
+            type="button"
+            onClick={() => setShowNewColor(!showNewColor)}
+            className="inline-flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 transition-all hover:bg-blue-200"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo color
+          </button>
+        </div>
+
+        {showNewColor && (
+          <div className="mb-3 flex flex-wrap items-end gap-2 rounded-lg border border-blue-200 bg-white p-3">
+            <div>
+              <label className="mb-1 block text-[10px] font-medium text-gray-500">Nombre</label>
+              <input
+                type="text"
+                value={newColorName}
+                onChange={(e) => setNewColorName(e.target.value)}
+                className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-400 focus:outline-none"
+                placeholder="Ej: Turquesa"
+              />
             </div>
-          )}
+            <div>
+              <label className="mb-1 block text-[10px] font-medium text-gray-500">Color</label>
+              <input
+                type="color"
+                value={newColorHex}
+                onChange={(e) => setNewColorHex(e.target.value)}
+                className="h-8 w-10 cursor-pointer rounded-lg border border-gray-300"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleCreateColor}
+              disabled={!newColorName.trim() || creatingColor}
+              className="rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+            >
+              {creatingColor ? "Creando..." : "Crear"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowNewColor(false); setNewColorName(""); setNewColorHex("#808080") }}
+              className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-200"
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
 
-          {colorSelections.length === 0 && (
-            <p className="text-xs text-gray-400">No has seleccionado ningún color aún</p>
-          )}
+        {availableColors.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {availableColors.map((color) => (
+              <button
+                key={color.id}
+                type="button"
+                onClick={() => isEdit ? handleAddEditVariant(color.id) : addColorSelection(color.id)}
+                className="flex items-center gap-2 rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:border-primary-400 hover:bg-primary-50 active:scale-[0.97]"
+              >
+                <span
+                  className="h-5 w-5 rounded-full border border-gray-300 shadow-inner"
+                  style={{ backgroundColor: color.codigo_hex }}
+                />
+                + {color.nombre}
+              </button>
+            ))}
+          </div>
+        )}
 
+        {!isEdit && colorSelections.length === 0 && (
+          <p className="text-xs text-gray-400">No has seleccionado ningún color aún</p>
+        )}
+        {isEdit && variants.length === 0 && (
+          <p className="text-xs text-gray-400">No hay colores asignados aún</p>
+        )}
+
+        {!isEdit ? (
           <div className="space-y-4">
             {colorSelections.map((cs) => {
-              const color = allColors.find((c) => c.id === cs.colorId)
+              const color = colors.find((c) => c.id === cs.colorId)
               return (
                 <div key={cs.colorId} className="rounded-lg border border-gray-200 bg-white p-3">
                   <div className="mb-2 flex items-center justify-between">
@@ -417,33 +700,199 @@ export default function ProductForm({ product, categories, productTypes, allColo
               )
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-4">
+            {variants.map((variant, vi) => (
+              <div
+                key={variant.id}
+                className={`rounded-lg border bg-white p-3 transition-all ${
+                  variant.disponible ? "border-gray-200" : "border-gray-200 opacity-60"
+                }`}
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-6 w-6 rounded-full border border-gray-300 shadow-inner"
+                      style={{ backgroundColor: variant.color?.codigo_hex }}
+                    />
+                    <span className="text-sm font-medium text-gray-900">{variant.color?.nombre}</span>
+                    <span className="text-xs text-gray-400">
+                      {variant.images.length} imagen{variant.images.length !== 1 ? "es" : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleEditVariant(variant.id, variant.disponible)}
+                      className={`rounded-lg px-2 py-1 text-xs font-medium transition-all ${
+                        variant.disponible
+                          ? "bg-green-100 text-green-700 hover:bg-green-200"
+                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      }`}
+                    >
+                      {variant.disponible ? "Activo" : "Inactivo"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteEditVariant(variant.id)}
+                      className="rounded-lg bg-red-50 p-1.5 text-red-500 transition-all hover:bg-red-100"
+                      title="Eliminar color"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
 
-      {allSizes.length > 0 && (
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Tallas disponibles</label>
-          <div className="flex flex-wrap gap-2">
-            {allSizes.filter((s) => s.activo).map((size) => (
+                {variant.images.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {variant.images.map((img, ii) => (
+                      <div key={img.id} className="group relative">
+                        <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-gray-200">
+                          <Image
+                            src={img.url}
+                            alt={`${variant.color?.nombre || ""} - ${ii + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                            unoptimized
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteEditImage(variant.id, img.id)}
+                          className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                        {ii === 0 && (
+                          <span className="absolute right-0 bottom-0 rounded-tl-lg bg-primary-600 px-1 py-0.5 text-[9px] font-bold text-white">
+                            1°
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <label className="relative inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 shadow-sm transition-all hover:border-primary-400 hover:text-primary-600 active:scale-[0.98]">
+                  <input
+                    ref={(el) => { fileInputRefs.current[variant.id] = el }}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED.join(",")}
+                    onChange={(e) => handleUploadEditImages(variant.id, e)}
+                    className="sr-only"
+                  />
+                  {uploading[variant.id] ? (
+                    <span className="text-primary-600">Subiendo...</span>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Agregar fotos
+                    </>
+                  )}
+                </label>
+                <p className="mt-1 text-[10px] text-gray-400">JPG, PNG, WebP · Máx 5 MB</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-700">Tallas disponibles</label>
+          <button
+            type="button"
+            onClick={() => setShowNewSize(!showNewSize)}
+            className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 transition-all hover:bg-gray-200"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nueva talla
+          </button>
+        </div>
+
+        {showNewSize && (
+          <div className="mb-3 flex items-end gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div>
+              <label className="mb-1 block text-[10px] font-medium text-gray-500">Nombre</label>
+              <input
+                type="text"
+                value={newSizeName}
+                onChange={(e) => setNewSizeName(e.target.value)}
+                className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-400 focus:outline-none"
+                placeholder="Ej: XXL"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleCreateSize}
+              disabled={!newSizeName.trim() || creatingSize}
+              className="rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+            >
+              {creatingSize ? "Creando..." : "Crear"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowNewSize(false); setNewSizeName("") }}
+              className="rounded-lg bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-200"
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          {sizes.map((size) => (
+            <div key={size.id} className="flex items-center gap-1">
               <button
-                key={size.id}
                 type="button"
                 onClick={() => toggleSize(size.id)}
                 className={`rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all ${
                   selectedSizes.includes(size.id)
                     ? "border-primary-600 bg-primary-50 text-primary-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                    : size.activo
+                      ? "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                      : "border-gray-200 bg-gray-50 text-gray-400 line-through"
                 }`}
               >
                 {size.nombre}
               </button>
-            ))}
-          </div>
-          <p className="mt-1 text-[10px] text-gray-400">
-            Selecciona las tallas que ofrece este producto
-          </p>
+              <button
+                type="button"
+                onClick={() => handleToggleSizeActive(size.id, size.activo)}
+                className={`rounded-md p-1 text-xs transition-all ${
+                  size.activo
+                    ? "text-green-600 hover:bg-green-50"
+                    : "text-gray-400 hover:bg-gray-100"
+                }`}
+                title={size.activo ? "Desactivar" : "Activar"}
+              >
+                {size.activo ? "●" : "○"}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteSize(size.id)}
+                className="rounded-md p-1 text-xs text-red-400 transition-all hover:bg-red-50 hover:text-red-600"
+                title="Eliminar"
+              >
+                ×
+              </button>
+            </div>
+          ))}
         </div>
-      )}
+        <p className="mt-1 text-[10px] text-gray-400">
+          Selecciona las tallas que ofrece este producto
+        </p>
+      </div>
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
