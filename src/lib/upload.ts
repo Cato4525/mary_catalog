@@ -1,8 +1,7 @@
 import { supabaseAdmin } from "./supabase"
+import { MAX_SIZE, ACCEPTED as ALLOWED_TYPES } from "./image-constants"
 
 const BUCKET = "product-images"
-const MAX_SIZE = 5 * 1024 * 1024
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"]
 
 export class UploadError extends Error {
   constructor(message: string) {

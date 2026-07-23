@@ -2,14 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
-
-interface Color {
-  id: number
-  nombre: string
-  codigo_hex: string
-  activo: boolean
-  created_at: string
-}
+import type { Color } from "@/lib/types"
 
 export default function ColorFilter({ colors }: { colors: Color[] }) {
   const router = useRouter()

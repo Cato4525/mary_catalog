@@ -2,16 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useRef, useState } from "react"
-
-interface Category {
-  id: number
-  nombre: string
-}
-
-interface ProductType {
-  id: number
-  nombre: string
-}
+import type { Category, ProductType } from "@/lib/types"
 
 export default function CatalogHeader({
   categories,

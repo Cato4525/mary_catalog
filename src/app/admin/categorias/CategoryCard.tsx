@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { deleteCategory } from "./actions"
+import ConfirmDeleteButton from "@/components/ConfirmDeleteButton"
 
 interface Props {
   category: { id: number; nombre: string }
@@ -23,17 +24,12 @@ export default function CategoryCard({ category }: Props) {
         </Link>
         <form action={deleteCategory} method="POST" className="inline">
           <input type="hidden" name="id" value={category.id} />
-          <button
-            type="submit"
+          <ConfirmDeleteButton
+            message="¿Eliminar esta categoría?"
             className="rounded-lg bg-red-50 px-3 py-2.5 text-sm font-medium text-red-600 transition-all hover:bg-red-100 active:scale-[0.97]"
-            onClick={(e) => {
-              if (!confirm("¿Eliminar esta categoría?")) {
-                e.preventDefault()
-              }
-            }}
           >
             Eliminar
-          </button>
+          </ConfirmDeleteButton>
         </form>
       </div>
     </div>
