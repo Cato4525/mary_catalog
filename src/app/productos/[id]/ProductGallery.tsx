@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import Image from "next/image"
 
 interface Props {
@@ -37,6 +37,8 @@ function getFilename(url: string, index: number): string {
 export default function ProductGallery({ images, productName }: Props) {
   const [selected, setSelected] = useState(0)
   const [downloading, setDownloading] = useState(false)
+  const thumbRef = useRef<HTMLDivElement>(null)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
   const handleDownload = useCallback(() => {
     if (downloading) return
@@ -46,6 +48,15 @@ export default function ProductGallery({ images, productName }: Props) {
     downloadImage(url, filename)
     setTimeout(() => setDownloading(false), 1000)
   }, [images, selected, downloading])
+
+  useEffect(() => {
+    const container = thumbRef.current
+    if (!container) return
+    const btn = container.children[selected] as HTMLElement
+    if (btn) {
+      btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" })
+    }
+  }, [selected])
 
   if (images.length === 0) {
     return (
@@ -58,9 +69,28 @@ export default function ProductGallery({ images, productName }: Props) {
   const prev = () => setSelected((s) => (s === 0 ? images.length - 1 : s - 1))
   const next = () => setSelected((s) => (s === images.length - 1 ? 0 : s + 1))
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return
+    const dx = e.changedTouches[0].clientX - touchStart.current.x
+    const dy = e.changedTouches[0].clientY - touchStart.current.y
+    touchStart.current = null
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) next()
+      else prev()
+    }
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-gray-100 group">
+    <div className="space-y-3">
+      <div
+        className="relative aspect-[4/5] overflow-hidden rounded-xl bg-gray-100 group select-none"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <Image
           src={images[selected]}
           alt={`${productName} - Imagen ${selected + 1}`}
@@ -74,7 +104,7 @@ export default function ProductGallery({ images, productName }: Props) {
           type="button"
           onClick={handleDownload}
           disabled={downloading}
-          className="absolute right-3 top-3 rounded-full bg-white/80 p-2.5 text-gray-700 shadow transition-colors hover:bg-white disabled:opacity-50"
+          className="absolute right-3 top-3 z-10 rounded-full bg-white/80 p-2.5 text-gray-700 shadow transition-colors hover:bg-white disabled:opacity-50"
           aria-label="Descargar imagen"
         >
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +117,7 @@ export default function ProductGallery({ images, productName }: Props) {
             <button
               type="button"
               onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-800 shadow transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 p-2 text-gray-800 shadow transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
               aria-label="Imagen anterior"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +127,7 @@ export default function ProductGallery({ images, productName }: Props) {
             <button
               type="button"
               onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 text-gray-800 shadow transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 p-2 text-gray-800 shadow transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
               aria-label="Imagen siguiente"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,30 +135,25 @@ export default function ProductGallery({ images, productName }: Props) {
               </svg>
             </button>
 
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelected(i)}
-                  className={`flex items-center justify-center rounded-full transition-all ${
-                    i === selected ? "h-3 w-6 bg-white" : "h-3 w-3 bg-white/50 hover:bg-white/80"
-                  }`}
-                  aria-label={`Imagen ${i + 1}`}
-                />
-              ))}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm">
+              <span className="text-[11px] font-medium text-white tabular-nums">
+                {selected + 1} / {images.length}
+              </span>
             </div>
           </>
         )}
       </div>
 
       {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-2">
+        <div ref={thumbRef} className="flex gap-2 overflow-x-auto scroll-smooth pb-1 px-0.5">
           {images.map((img, i) => (
             <button
               key={i}
               onClick={() => setSelected(i)}
-              className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
-                i === selected ? "border-primary-500 ring-2 ring-primary-100" : "border-gray-200 hover:border-gray-300"
+              className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
+                i === selected
+                  ? "border-primary-500 ring-2 ring-primary-200 opacity-100"
+                  : "border-gray-200 opacity-60 hover:opacity-90 hover:border-gray-300"
               }`}
             >
               <Image

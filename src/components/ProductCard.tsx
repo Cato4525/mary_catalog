@@ -136,7 +136,7 @@ export default function ProductCard({
 
         {/* Action buttons - right side */}
         {onToggleFavorite && (
-          <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2">
+          <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
             <ProductActions
               productId={product.id}
               productName={product.nombre}
@@ -208,13 +208,6 @@ export default function ProductCard({
                 </span>
               )}
             </div>
-            <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-white/50">
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              Toca para ver detalles
-            </span>
           </Link>
         </div>
       </div>
