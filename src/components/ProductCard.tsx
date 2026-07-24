@@ -143,21 +143,23 @@ export default function ProductCard({
               isFavorite={isFavorite}
               onToggleFavorite={onToggleFavorite}
             />
-            {product.first_variant_id && (
-              <div className="mt-4 flex justify-center">
-                <AddToCartButton
-                  product={{
-                    id: product.id,
-                    variant_id: product.first_variant_id,
-                    nombre: product.nombre,
-                    color: colors[0]?.color || "",
-                    categoria: product.categories?.nombre || "",
-                    imagen_url: product.imagen_url || "",
-                  }}
-                  variant="icon"
-                />
-              </div>
-            )}
+          </div>
+        )}
+
+        {/* Add to cart - center */}
+        {product.first_variant_id && (
+          <div className="absolute bottom-32 left-0 right-0 z-10 flex justify-center">
+            <AddToCartButton
+              product={{
+                id: product.id,
+                variant_id: product.first_variant_id,
+                nombre: product.nombre,
+                color: colors[0]?.color || "",
+                categoria: product.categories?.nombre || "",
+                imagen_url: product.imagen_url || "",
+              }}
+              variant="icon"
+            />
           </div>
         )}
 
