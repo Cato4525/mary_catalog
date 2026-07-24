@@ -38,7 +38,7 @@ export default async function Home({
   const productIds = (products as any[]).map((p: any) => p.id)
 
   const allVariants = productIds.length
-    ? await api(`product_variants?select=id,product_id,color_id,disponible&disponible=eq.true&product_id=in.(${productIds.join(",")})`)
+    ? await api(`product_variants?select=id,product_id,color_id,disponible&product_id=in.(${productIds.join(",")})`)
     : []
 
   const variantIds = (allVariants as any[]).map((v: any) => v.id)
