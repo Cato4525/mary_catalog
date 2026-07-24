@@ -71,7 +71,14 @@ export default function ProductForm({ product, categories, productTypes, allColo
   const availableColors = colors.filter((c) => c.activo && !usedColorIds.has(c.id))
 
   const addColorSelection = (colorId: number) => {
-    setColorSelections((prev) => [...prev, { colorId, files: [], previews: [] }])
+    setColorSelections((prev) => {
+      if (prev.some((cs) => cs.colorId === colorId)) return prev
+      return [...prev, { colorId, files: [], previews: [] }]
+    })
+    setTimeout(() => {
+      const el = fileInputRefs.current[colorId]
+      if (el) el.click()
+    }, 100)
   }
 
   const removeColorSelection = (colorId: number) => {
@@ -560,19 +567,21 @@ export default function ProductForm({ product, categories, productTypes, allColo
         )}
 
         {availableColors.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-3 mb-3">
             {availableColors.map((color) => (
               <button
                 key={color.id}
                 type="button"
                 onClick={() => isEdit ? handleAddEditVariant(color.id) : addColorSelection(color.id)}
-                className="flex items-center gap-2 rounded-full border-2 border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:border-primary-400 hover:bg-primary-50 active:scale-[0.97]"
+                className="group flex flex-col items-center gap-1.5"
               >
                 <span
-                  className="h-5 w-5 rounded-full border border-gray-300 shadow-inner"
+                  className="h-10 w-10 rounded-full border-2 border-gray-300 shadow-md transition-all group-hover:scale-110 group-hover:border-primary-500 group-hover:shadow-lg"
                   style={{ backgroundColor: color.codigo_hex }}
                 />
-                + {color.nombre}
+                <span className="text-[11px] font-medium text-gray-600 group-hover:text-primary-700">
+                  + {color.nombre}
+                </span>
               </button>
             ))}
           </div>

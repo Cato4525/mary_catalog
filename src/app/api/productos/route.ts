@@ -82,11 +82,18 @@ export async function POST(request: Request) {
 
         const newOrden = (maxOrden?.orden ?? -1) + 1
 
+        const { data: colorRow } = await supabaseAdmin
+          .from("colors")
+          .select("nombre")
+          .eq("id", entry.color_id)
+          .single()
+
         const { data: variant, error: varError } = await supabaseAdmin
           .from("product_variants")
           .insert({
             product_id: productId,
             color_id: entry.color_id,
+            color: colorRow?.nombre || "",
             disponible: true,
             orden: newOrden,
           })
