@@ -6,6 +6,7 @@ import Image from "next/image"
 interface Props {
   images: string[]
   productName: string
+  onImageChange?: (index: number) => void
 }
 
 function downloadImage(url: string, filename: string) {
@@ -34,11 +35,26 @@ function getFilename(url: string, index: number): string {
   }
 }
 
-export default function ProductGallery({ images, productName }: Props) {
+export default function ProductGallery({ images, productName, onImageChange }: Props) {
   const [selected, setSelected] = useState(0)
   const [downloading, setDownloading] = useState(false)
   const thumbRef = useRef<HTMLDivElement>(null)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
+
+  const handleSelect = useCallback((index: number) => {
+    setSelected(index)
+    onImageChange?.(index)
+  }, [onImageChange])
+
+  const prev = useCallback(() => {
+    const idx = selected === 0 ? images.length - 1 : selected - 1
+    handleSelect(idx)
+  }, [selected, images.length, handleSelect])
+
+  const nextFn = useCallback(() => {
+    const idx = selected === images.length - 1 ? 0 : selected + 1
+    handleSelect(idx)
+  }, [selected, images.length, handleSelect])
 
   const handleDownload = useCallback(() => {
     if (downloading) return
@@ -66,9 +82,6 @@ export default function ProductGallery({ images, productName }: Props) {
     )
   }
 
-  const prev = () => setSelected((s) => (s === 0 ? images.length - 1 : s - 1))
-  const next = () => setSelected((s) => (s === images.length - 1 ? 0 : s + 1))
-
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
   }
@@ -79,7 +92,7 @@ export default function ProductGallery({ images, productName }: Props) {
     const dy = e.changedTouches[0].clientY - touchStart.current.y
     touchStart.current = null
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-      if (dx < 0) next()
+      if (dx < 0) nextFn()
       else prev()
     }
   }
@@ -126,7 +139,7 @@ export default function ProductGallery({ images, productName }: Props) {
             </button>
             <button
               type="button"
-              onClick={next}
+              onClick={nextFn}
               className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/80 p-2 text-gray-800 shadow transition-opacity hover:bg-white md:opacity-0 md:group-hover:opacity-100"
               aria-label="Imagen siguiente"
             >
@@ -149,7 +162,7 @@ export default function ProductGallery({ images, productName }: Props) {
           {images.map((img, i) => (
             <button
               key={i}
-              onClick={() => setSelected(i)}
+              onClick={() => handleSelect(i)}
               className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all sm:h-20 sm:w-20 ${
                 i === selected
                   ? "border-primary-500 ring-2 ring-primary-200 opacity-100"

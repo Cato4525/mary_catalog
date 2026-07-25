@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { updateColor } from "../actions"
+import HexColorInput from "@/components/HexColorInput"
 
 export default async function EditarColorPage({ params }: { params: { id: string } }) {
   const { data: color } = await supabase
@@ -48,18 +49,7 @@ export default async function EditarColorPage({ params }: { params: { id: string
               defaultValue={color.codigo_hex}
               className="h-10 w-14 cursor-pointer rounded-lg border border-gray-300 p-0.5"
             />
-            <input
-              type="text"
-              defaultValue={color.codigo_hex}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
-              onChange={(e) => {
-                const form = e.target.closest("form")!
-                const colorInput = form.elements.namedItem("codigo_hex") as HTMLInputElement
-                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                  colorInput.value = e.target.value
-                }
-              }}
-            />
+            <HexColorInput defaultValue={color.codigo_hex} />
           </div>
         </div>
         <div className="flex flex-wrap gap-3">

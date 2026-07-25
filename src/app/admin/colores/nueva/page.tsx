@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { createColor } from "../actions"
+import HexColorInput from "@/components/HexColorInput"
 
 export default function NuevoColorPage() {
   return (
@@ -37,19 +38,7 @@ export default function NuevoColorPage() {
               defaultValue="#808080"
               className="h-10 w-14 cursor-pointer rounded-lg border border-gray-300 p-0.5"
             />
-            <input
-              name="codigo_hex_text"
-              type="text"
-              defaultValue="#808080"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
-              placeholder="#000000"
-              onChange={(e) => {
-                const colorInput = (e.target.form as HTMLFormElement).elements.namedItem("codigo_hex") as HTMLInputElement
-                if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
-                  colorInput.value = e.target.value
-                }
-              }}
-            />
+            <HexColorInput defaultValue="#808080" />
           </div>
           <p className="mt-1 text-[10px] text-gray-400">Selecciona o escribe el código HEX del color</p>
         </div>

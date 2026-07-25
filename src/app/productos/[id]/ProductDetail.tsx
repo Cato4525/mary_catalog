@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import ProductGallery from "./ProductGallery"
 import ProductWhatsAppButton from "@/components/ProductWhatsAppButton"
 import AddToCartButton from "@/components/AddToCartButton"
@@ -28,15 +28,35 @@ export default function ProductDetail({
 }: Props) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
   const selectedVariant = variants[selectedVariantIndex] || variants[0]
+
+  const allImages = useMemo(() => {
+    const result: { url: string; variantIndex: number }[] = []
+    for (let i = 0; i < variants.length; i++) {
+      const sorted = [...(variants[i].images || [])].sort((a: any, b: any) => a.orden - b.orden)
+      for (const img of sorted) {
+        result.push({ url: img.url, variantIndex: i })
+      }
+    }
+    return result
+  }, [variants])
+
+  const imageUrls = useMemo(() => allImages.map((img) => img.url), [allImages])
+
+  const handleImageChange = useCallback((index: number) => {
+    const entry = allImages[index]
+    if (entry && entry.variantIndex !== selectedVariantIndex) {
+      setSelectedVariantIndex(entry.variantIndex)
+    }
+  }, [allImages, selectedVariantIndex])
+
+  const colorName = selectedVariant?.colors?.nombre || ""
   const images = (selectedVariant?.images || [])
     .sort((a: any, b: any) => a.orden - b.orden)
     .map((img: any) => img.url)
-  const colorName = selectedVariant?.colors?.nombre || ""
-  const colorHex = selectedVariant?.colors?.hex || null
 
   return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-8">
-      <ProductGallery images={images} productName={product.nombre} />
+      <ProductGallery images={imageUrls} productName={product.nombre} onImageChange={handleImageChange} />
 
       <div className="space-y-4">
         <div>
