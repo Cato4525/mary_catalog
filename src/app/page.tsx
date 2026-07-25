@@ -1,5 +1,6 @@
 import CatalogHeader from "@/components/CatalogHeader"
 import ColorSidebar from "@/components/ColorSidebar"
+import ContactSection from "@/components/ContactSection"
 import ProductGrid from "@/components/ProductGrid"
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
@@ -174,6 +175,8 @@ export default async function Home({
           </div>
         </div>
       </div>
+
+      <ContactSection />
     </>
   )
 }
