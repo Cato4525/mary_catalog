@@ -27,6 +27,7 @@ export default function ProductDetail({
   whatsapp,
 }: Props) {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
+  const [showAllImages, setShowAllImages] = useState(true)
   const selectedVariant = variants[selectedVariantIndex] || variants[0]
 
   const allImages = useMemo(() => {
@@ -40,23 +41,71 @@ export default function ProductDetail({
     return result
   }, [variants])
 
-  const imageUrls = useMemo(() => allImages.map((img) => img.url), [allImages])
+  const variantImages = useMemo(() => {
+    const sorted = [...(selectedVariant?.images || [])].sort((a: any, b: any) => a.orden - b.orden)
+    return sorted.map((img: any) => img.url)
+  }, [selectedVariant])
+
+  const displayImages = showAllImages
+    ? allImages.map((img) => img.url)
+    : variantImages
 
   const handleImageChange = useCallback((index: number) => {
+    if (!showAllImages) return
     const entry = allImages[index]
     if (entry && entry.variantIndex !== selectedVariantIndex) {
       setSelectedVariantIndex(entry.variantIndex)
     }
-  }, [allImages, selectedVariantIndex])
+  }, [allImages, selectedVariantIndex, showAllImages])
+
+  const handleSelectColor = useCallback((index: number) => {
+    setSelectedVariantIndex(index)
+    setShowAllImages(false)
+  }, [])
 
   const colorName = selectedVariant?.colors?.nombre || ""
-  const images = (selectedVariant?.images || [])
-    .sort((a: any, b: any) => a.orden - b.orden)
-    .map((img: any) => img.url)
 
   return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-8">
-      <ProductGallery images={imageUrls} productName={product.nombre} onImageChange={handleImageChange} />
+      <div className="space-y-3">
+        {variants.length > 1 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setShowAllImages(true)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                showAllImages
+                  ? "border-primary-600 bg-primary-50 text-primary-700 shadow-sm"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-primary-400 hover:bg-primary-50"
+              }`}
+            >
+              Todas ({allImages.length})
+            </button>
+            {variants.map((v, i) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => handleSelectColor(i)}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  !showAllImages && i === selectedVariantIndex
+                    ? "border-primary-600 bg-primary-50 text-primary-700 shadow-sm"
+                    : "border-gray-300 bg-white text-gray-700 hover:border-primary-400 hover:bg-primary-50"
+                }`}
+              >
+                {v.colors?.hex && (
+                  <span
+                    className="h-3 w-3 rounded-full border border-gray-300 shadow-inner"
+                    style={{ backgroundColor: v.colors.hex }}
+                  />
+                )}
+                {v.colors?.nombre}
+                <span className="opacity-60">({v.images.length})</span>
+              </button>
+            ))}
+          </div>
+        )}
+        <ProductGallery images={displayImages} productName={product.nombre} onImageChange={handleImageChange} />
+      </div>
 
       <div className="space-y-4">
         <div>
@@ -88,16 +137,16 @@ export default function ProductDetail({
         {variants.length > 0 && (
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Color: <span className="font-normal text-gray-500">{colorName}</span>
+              Color: <span className="font-normal text-gray-500">{showAllImages ? "Todos" : colorName}</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {variants.map((v, i) => (
                 <button
                   key={v.id}
                   type="button"
-                  onClick={() => setSelectedVariantIndex(i)}
+                  onClick={() => handleSelectColor(i)}
                   className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                    i === selectedVariantIndex
+                    !showAllImages && i === selectedVariantIndex
                       ? "border-primary-600 bg-primary-50 text-primary-700 shadow-sm"
                       : "border-gray-300 bg-white text-gray-700 hover:border-primary-400 hover:bg-primary-50"
                   }`}
@@ -120,12 +169,12 @@ export default function ProductDetail({
           </div>
         )}
 
-        {images.length > 1 && (
+        {displayImages.length > 1 && (
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span>{images.length} imágenes</span>
+            <span>{displayImages.length} imágenes</span>
           </div>
         )}
 
@@ -161,17 +210,17 @@ export default function ProductDetail({
               nombre: product.nombre,
               color: colorName,
               categoria: product.categories?.nombre || "",
-              imagen_url: images[0] || "",
+              imagen_url: (showAllImages ? allImages[0]?.url : variantImages[0]) || "",
             }}
           />
         )}
 
-        {whatsapp && selectedVariant && images.length > 0 && (
+        {whatsapp && selectedVariant && displayImages.length > 0 && (
           <ProductWhatsAppButton
             whatsapp={whatsapp}
             nombre={product.nombre}
             color={colorName}
-            imagenUrl={images[0]}
+            imagenUrl={displayImages[0]}
           />
         )}
       </div>
