@@ -1,35 +1,44 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 import { supabaseAdmin } from "@/lib/supabase"
 
 export async function createTipo(formData: FormData) {
   const nombre = (formData.get("nombre") as string)?.trim()
-  if (!nombre) return
+  if (!nombre) return { error: "Nombre requerido" }
 
-  const { error } = await supabaseAdmin.from("product_types").insert({ nombre })
-  if (error) {
-    throw new Error(error.message)
-  }
+  const { data: existing } = await supabaseAdmin
+    .from("product_types")
+    .select("id")
+    .ilike("nombre", nombre)
+    .maybeSingle()
 
+  if (existing) return { error: "Ya existe un tipo con ese nombre" }
+
+  await supabaseAdmin.from("product_types").insert({ nombre })
   revalidatePath("/admin/tipos")
-  redirect("/admin/tipos")
 }
 
 export async function updateTipo(formData: FormData) {
   const id = formData.get("id")
   const nombre = (formData.get("nombre") as string)?.trim()
-  if (!id || !nombre) return
+  if (!id || !nombre) return { error: "Datos incompletos" }
 
-  const { error } = await supabaseAdmin
+  const { data: existing } = await supabaseAdmin
+    .from("product_types")
+    .select("id")
+    .ilike("nombre", nombre)
+    .neq("id", Number(id))
+    .maybeSingle()
+
+  if (existing) return { error: "Ya existe un tipo con ese nombre" }
+
+  await supabaseAdmin
     .from("product_types")
     .update({ nombre })
     .eq("id", Number(id))
-  if (error) throw new Error(error.message)
 
   revalidatePath("/admin/tipos")
-  redirect("/admin/tipos")
 }
 
 export async function deleteTipo(formData: FormData) {
@@ -38,5 +47,4 @@ export async function deleteTipo(formData: FormData) {
 
   await supabaseAdmin.from("product_types").delete().eq("id", Number(id))
   revalidatePath("/admin/tipos")
-  redirect("/admin/tipos")
 }

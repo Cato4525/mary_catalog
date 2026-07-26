@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import ProductActions from "./ProductActions"
 import AddToCartButton from "./AddToCartButton"
@@ -34,6 +35,7 @@ export default function ProductCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const { addItem } = useCart()
   const isVisibleRef = useRef(false)
+  const router = useRouter()
 
   useEffect(() => {
     const el = cardRef.current
@@ -86,7 +88,7 @@ export default function ProductCard({
       touchStart.current = null
 
       if (dx < 15 && dy < 15) {
-        window.location.href = `/productos/${product.id}`
+        router.push(`/productos/${product.id}`)
         return
       }
     }

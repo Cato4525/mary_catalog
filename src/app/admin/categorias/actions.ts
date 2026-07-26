@@ -1,37 +1,44 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 import { supabaseAdmin } from "@/lib/supabase"
 
 export async function createCategory(formData: FormData) {
-  const nombre = formData.get("nombre") as string
-  if (!nombre?.trim()) return
+  const nombre = (formData.get("nombre") as string)?.trim()
+  if (!nombre) return { error: "Nombre requerido" }
 
-  const { error } = await supabaseAdmin
+  const { data: existing } = await supabaseAdmin
     .from("categories")
-    .insert({ nombre: nombre.trim() })
+    .select("id")
+    .ilike("nombre", nombre)
+    .maybeSingle()
 
-  if (error) throw new Error(error.message)
+  if (existing) return { error: "Ya existe una categoría con ese nombre" }
 
+  await supabaseAdmin.from("categories").insert({ nombre })
   revalidatePath("/admin/categorias")
-  redirect("/admin/categorias")
 }
 
 export async function updateCategory(formData: FormData) {
   const id = Number(formData.get("id"))
-  const nombre = formData.get("nombre") as string
-  if (!id || !nombre?.trim()) return
+  const nombre = (formData.get("nombre") as string)?.trim()
+  if (!id || !nombre) return { error: "Datos incompletos" }
 
-  const { error } = await supabaseAdmin
+  const { data: existing } = await supabaseAdmin
     .from("categories")
-    .update({ nombre: nombre.trim() })
+    .select("id")
+    .ilike("nombre", nombre)
+    .neq("id", id)
+    .maybeSingle()
+
+  if (existing) return { error: "Ya existe una categoría con ese nombre" }
+
+  await supabaseAdmin
+    .from("categories")
+    .update({ nombre })
     .eq("id", id)
 
-  if (error) throw new Error(error.message)
-
   revalidatePath("/admin/categorias")
-  redirect("/admin/categorias")
 }
 
 export async function deleteCategory(formData: FormData) {
@@ -39,7 +46,5 @@ export async function deleteCategory(formData: FormData) {
   if (!id) return
 
   await supabaseAdmin.from("categories").delete().eq("id", Number(id))
-
   revalidatePath("/admin/categorias")
-  redirect("/admin/categorias")
 }

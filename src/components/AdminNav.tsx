@@ -214,7 +214,7 @@ export default function AdminNav({ hasSession }: { hasSession: boolean }) {
       </nav>
 
       {/* ── Desktop sidebar ── */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-gray-200 bg-white shadow-sm lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-gray-200 bg-white shadow-sm lg:flex">
         <div className="flex h-14 items-center gap-3 border-b border-gray-200 px-5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-sm font-bold text-white">
             M

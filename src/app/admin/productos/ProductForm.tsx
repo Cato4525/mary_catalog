@@ -38,9 +38,9 @@ function generateCodePrefix(nombre: string): string {
   const words = nombre.trim().split(/\s+/).filter(Boolean)
   if (words.length === 0) return ""
   if (words.length === 1) {
-    return words[0].substring(0, 2).toUpperCase()
+    return words[0].substring(0, 3).toUpperCase()
   }
-  return words.slice(0, 2).map((w) => w[0]).join("").toUpperCase()
+  return words.slice(0, 3).map((w) => w[0]).join("").toUpperCase()
 }
 
 interface ColorSelection {

@@ -1,7 +1,14 @@
+"use client"
+
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
 import { createSize } from "../actions"
 
 export default function NuevaTallaPage() {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <Link
@@ -15,7 +22,15 @@ export default function NuevaTallaPage() {
       </Link>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Nueva Talla</h1>
       <form
-        action={createSize}
+        onSubmit={(e) => {
+          e.preventDefault()
+          const formData = new FormData(e.currentTarget)
+          startTransition(async () => {
+            await createSize(formData)
+            router.push("/admin/tallas")
+            router.refresh()
+          })
+        }}
         className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
       >
         <div>
@@ -31,9 +46,10 @@ export default function NuevaTallaPage() {
         <div className="flex flex-wrap gap-3">
           <button
             type="submit"
-            className="rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md active:scale-[0.97]"
+            disabled={isPending}
+            className="rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-700 hover:shadow-md active:scale-[0.97] disabled:opacity-50"
           >
-            Crear Talla
+            {isPending ? "Creando..." : "Crear Talla"}
           </button>
           <Link
             href="/admin/tallas"

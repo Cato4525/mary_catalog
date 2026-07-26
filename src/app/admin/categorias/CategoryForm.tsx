@@ -29,7 +29,10 @@ export default function CategoryForm({ category }: Props) {
     }
     try {
       const fn = category ? updateCategory : createCategory
-      await fn(formData)
+      const result = await fn(formData)
+      if (result?.error) return result.error
+      router.push("/admin/categorias")
+      router.refresh()
       return null
     } catch (err) {
       return err instanceof Error ? err.message : "Error al guardar"

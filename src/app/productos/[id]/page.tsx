@@ -17,26 +17,28 @@ async function api(url: string) {
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   try {
-    const products = await api(`products?select=*,categories(nombre)&id=eq.${params.id}`)
-    const product = products[0]
+    const [productsData, variantsData] = await Promise.all([
+      api(`products?select=*,categories(nombre)&id=eq.${params.id}`),
+      api(`product_variants?select=*&product_id=eq.${params.id}&order=orden.asc`),
+    ])
+    const product = productsData[0]
     if (!product) notFound()
 
-    const variants = await api(`product_variants?select=*&product_id=eq.${params.id}&order=orden.asc`)
-
+    const variants = variantsData
     const colorIds = Array.from(new Set(variants.map((v: any) => v.color_id).filter(Boolean)))
-    const colors = colorIds.length
-      ? await api(`colors?select=*&id=in.(${colorIds.join(",")})`)
-      : []
-    const colorMap: Record<number, any> = {}
-    for (const c of colors) colorMap[c.id] = c
-
     const variantIds = variants.map((v: any) => v.id)
-    const images = variantIds.length
-      ? await api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})`)
-      : []
+
+    const [colorsData, imagesData, productSizesData] = await Promise.all([
+      colorIds.length ? api(`colors?select=*&id=in.(${colorIds.join(",")})`) : [],
+      variantIds.length ? api(`product_images?select=*&variant_id=in.(${variantIds.join(",")})`) : [],
+      api(`product_sizes?select=sizes(nombre)&product_id=eq.${params.id}`),
+    ])
+
+    const colorMap: Record<number, any> = {}
+    for (const c of colorsData) colorMap[c.id] = c
 
     const variantImages: Record<number, any[]> = {}
-    for (const img of images) {
+    for (const img of imagesData) {
       if (!variantImages[img.variant_id]) variantImages[img.variant_id] = []
       variantImages[img.variant_id].push(img)
     }
@@ -47,7 +49,6 @@ export default async function ProductPage({ params }: { params: { id: string } }
       images: (variantImages[v.id] || []).sort((a: any, b: any) => a.orden - b.orden),
     }))
 
-    const productSizesData = await api(`product_sizes?select=sizes(nombre)&product_id=eq.${params.id}`)
     const sizeNames = productSizesData
       .map((ps: any) => ps.sizes?.nombre)
       .filter(Boolean)
