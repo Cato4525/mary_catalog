@@ -6,7 +6,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = cookieStore.get("admin_session")
 
   return (
-    <div className="pt-12 pb-16 lg:pt-0 lg:pl-64 lg:pb-0">
+    <div className="pt-12 pb-20 lg:pt-0 lg:pl-64 lg:pb-0">
       <AdminNav hasSession={!!session} />
       <main>{children}</main>
     </div>

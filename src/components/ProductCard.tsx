@@ -171,7 +171,7 @@ export default function ProductCard({
 
         {product.first_variant_id && (
           <div
-            className="absolute bottom-20 left-0 right-0 z-10 flex justify-center"
+            className="absolute bottom-24 left-0 right-0 z-10 flex justify-center"
             onClick={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
           >
@@ -190,7 +190,7 @@ export default function ProductCard({
         )}
 
         {(colors.length > 0 || product.sizes?.length > 0) && (
-          <div className="absolute left-3 bottom-36 z-10 flex flex-col gap-3">
+          <div className="absolute left-3 bottom-48 z-20 flex flex-col gap-3">
             {colors.length > 0 && (
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] font-semibold text-white/70 drop-shadow-md">
@@ -233,7 +233,7 @@ export default function ProductCard({
           </div>
         )}
 
-        <div className="absolute bottom-16 left-0 right-16 z-10 p-4">
+        <div className="absolute bottom-20 left-0 right-16 z-20 p-4">
           <Link href={`/productos/${product.id}`}>
             {product.destacado && (
               <span className="mb-1.5 inline-block rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
