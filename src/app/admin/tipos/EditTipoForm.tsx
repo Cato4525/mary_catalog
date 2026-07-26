@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
-import { updateTipo } from "../actions"
+import { updateTipo } from "./actions"
 
 interface Props {
   type: { id: number; nombre: string }

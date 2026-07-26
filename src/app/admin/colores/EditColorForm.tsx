@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
-import { updateColor } from "../actions"
+import { updateColor } from "./actions"
 import HexColorInput from "@/components/HexColorInput"
 
 interface Props {

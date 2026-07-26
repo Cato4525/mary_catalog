@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
-import { updateSize } from "../actions"
+import { updateSize } from "./actions"
 
 interface Props {
   size: { id: number; nombre: string }

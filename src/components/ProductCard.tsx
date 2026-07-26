@@ -205,27 +205,48 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Color circles - left side */}
-        {colors.length > 0 && (
-          <div className="absolute left-3 bottom-36 z-10 flex flex-col gap-1.5">
-            <span className="text-[10px] font-semibold text-white/70 drop-shadow-md">
-              Colores disponibles
-            </span>
-            <div className="flex flex-col items-start gap-1.5">
-              {colors.slice(0, 5).map((c: any, i: number) => (
-                <div
-                  key={c.id || i}
-                  title={c.color || ""}
-                  className="h-5 w-5 rounded-full border-2 border-white/40 shadow-md"
-                  style={{ backgroundColor: c.hex || "#808080" }}
-                />
-              ))}
-              {colors.length > 5 && (
-                <span className="text-[10px] font-bold text-white/80">
-                  +{colors.length - 5}
+        {/* Color circles + sizes - left side */}
+        {(colors.length > 0 || product.sizes?.length > 0) && (
+          <div className="absolute left-3 bottom-36 z-10 flex flex-col gap-3">
+            {colors.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-semibold text-white/70 drop-shadow-md">
+                  Colores disponibles
                 </span>
-              )}
-            </div>
+                <div className="flex flex-col items-start gap-1.5">
+                  {colors.slice(0, 5).map((c: any, i: number) => (
+                    <div
+                      key={c.id || i}
+                      title={c.color || ""}
+                      className="h-5 w-5 rounded-full border-2 border-white/40 shadow-md"
+                      style={{ backgroundColor: c.hex || "#808080" }}
+                    />
+                  ))}
+                  {colors.length > 5 && (
+                    <span className="text-[10px] font-bold text-white/80">
+                      +{colors.length - 5}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {product.sizes?.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-semibold text-white/70 drop-shadow-md">
+                  Tallas disponibles
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {product.sizes.map((s: string, i: number) => (
+                    <span
+                      key={i}
+                      className="rounded-md bg-white/20 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

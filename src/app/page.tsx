@@ -48,12 +48,23 @@ export default async function Home({
     ? await api(`product_images?select=variant_id,url,sort_order&variant_id=in.(${variantIds.join(",")})`)
     : []
 
+  const allSizes = productIds.length
+    ? await api(`product_sizes?select=sizes(nombre),product_id&product_id=in.(${productIds.join(",")})`)
+    : []
+
   const imagesByProduct: Record<number, string[]> = {}
   for (const img of (allImages as any[])) {
     const variant = (allVariants as any[]).find((v: any) => v.id === img.variant_id)
     if (!variant) continue
     if (!imagesByProduct[variant.product_id]) imagesByProduct[variant.product_id] = []
     imagesByProduct[variant.product_id].push(img.url)
+  }
+
+  const sizesByProduct: Record<number, string[]> = {}
+  for (const ps of (allSizes as any[])) {
+    const pid = ps.product_id
+    if (!sizesByProduct[pid]) sizesByProduct[pid] = []
+    if (ps.sizes?.nombre) sizesByProduct[pid].push(ps.sizes.nombre)
   }
 
   const variantsByProduct: Record<number, any[]> = {}
@@ -88,6 +99,7 @@ export default async function Home({
           hex: (colors as any[]).find((c: any) => c.id === v.color_id)?.codigo_hex || "#808080",
         })),
         colorNames,
+        sizes: sizesByProduct[p.id] || [],
         categories: p.categories || null,
         product_types: p.product_types || null,
       }
