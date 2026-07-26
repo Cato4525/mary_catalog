@@ -2,7 +2,7 @@
 
 import type { Category, ProductType, Product, Color, Size, ProductVariant, ProductImage } from "@/lib/types"
 import { compressImage, ACCEPTED, MAX_SIZE } from "@/lib/image-utils"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 
@@ -34,6 +34,15 @@ function generateSlug(nombre: string): string {
     .replace(/^-|-$/g, "")
 }
 
+function generateCodePrefix(nombre: string): string {
+  const words = nombre.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return ""
+  if (words.length === 1) {
+    return words[0].substring(0, 2).toUpperCase()
+  }
+  return words.slice(0, 2).map((w) => w[0]).join("").toUpperCase()
+}
+
 interface ColorSelection {
   colorId: number
   files: File[]
@@ -45,9 +54,12 @@ export default function ProductForm({ product, categories, productTypes, allColo
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [slug, setSlug] = useState(product?.slug || "")
+  const [codigo, setCodigo] = useState(product?.codigo || "")
+  const [codeGenerated, setCodeGenerated] = useState(!!product?.codigo)
   const [selectedSizes, setSelectedSizes] = useState<number[]>(productSizes)
   const [colorSelections, setColorSelections] = useState<ColorSelection[]>([])
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
   const isEdit = !!product
 
@@ -64,6 +76,30 @@ export default function ProductForm({ product, categories, productTypes, allColo
   const [showNewSize, setShowNewSize] = useState(false)
   const [newSizeName, setNewSizeName] = useState("")
   const [creatingSize, setCreatingSize] = useState(false)
+
+  const handleNameChange = useCallback((value: string) => {
+    if (!product) setSlug(generateSlug(value))
+
+    if (product) return
+
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      const prefix = generateCodePrefix(value)
+      if (!prefix) {
+        setCodigo("")
+        setCodeGenerated(false)
+        return
+      }
+      try {
+        const res = await fetch(`/api/productos/code?prefix=${prefix}`)
+        if (res.ok) {
+          const { code } = await res.json()
+          setCodigo(code)
+          setCodeGenerated(true)
+        }
+      } catch {}
+    }, 400)
+  }, [product])
 
   const usedColorIds = new Set(
     isEdit ? variants.map((v) => v.color_id) : colorSelections.map((cs) => cs.colorId)
@@ -360,7 +396,7 @@ export default function ProductForm({ product, categories, productTypes, allColo
     const form = e.currentTarget
     const fd = new FormData()
     fd.set("nombre", (form.nombre as HTMLInputElement).value)
-    fd.set("codigo", (form.codigo as HTMLInputElement).value)
+    fd.set("codigo", codigo)
     fd.set("slug", slug)
     fd.set("descripcion", (form.descripcion as HTMLTextAreaElement).value)
     const catId = (form.categoria_id as HTMLSelectElement).value
@@ -415,15 +451,16 @@ export default function ProductForm({ product, categories, productTypes, allColo
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Código *</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Código</label>
           <input
             name="codigo"
             type="text"
-            required
-            defaultValue={product?.codigo || ""}
+            value={codigo}
+            onChange={(e) => { setCodigo(e.target.value.toUpperCase()); setCodeGenerated(false) }}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
-            placeholder="Ej: ML-001"
+            placeholder="Se genera automáticamente"
           />
+          <p className="mt-1 text-[10px] text-gray-400">{codeGenerated ? "Auto-generado desde el nombre" : "Escribe el nombre para generar"}</p>
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Nombre *</label>
@@ -432,7 +469,7 @@ export default function ProductForm({ product, categories, productTypes, allColo
             type="text"
             required
             defaultValue={product?.nombre || ""}
-            onChange={(e) => { if (!product) setSlug(generateSlug(e.target.value)) }}
+            onChange={(e) => handleNameChange(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100"
             placeholder="Ej: Legging Deportivo"
           />
