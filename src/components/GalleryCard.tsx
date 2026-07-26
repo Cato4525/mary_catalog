@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 import { useFavorites } from "@/hooks/useFavorites"
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
@@ -15,7 +16,14 @@ interface Props {
 }
 
 export default function GalleryCard({ product, colors = [], isFavorite = false, likeCount = 0, onToggleFavorite }: Props) {
-  const images: string[] = product.images || [product.imagen_url || PLACEHOLDER]
+  const [selectedColor, setSelectedColor] = useState<number | null>(null)
+
+  const allImages: string[] = product.images || [product.imagen_url || PLACEHOLDER]
+  const colorImages: Record<number, string[]> = product.imagesByColor || {}
+
+  const currentImages = selectedColor && colorImages[selectedColor]
+    ? colorImages[selectedColor]
+    : allImages
 
   return (
     <Link
@@ -23,10 +31,10 @@ export default function GalleryCard({ product, colors = [], isFavorite = false, 
       className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100"
     >
       <Image
-        src={images[0] || PLACEHOLDER}
+        src={currentImages[0] || PLACEHOLDER}
         alt={product.nombre}
         fill
-        className="object-cover"
+        className="object-cover transition-opacity duration-200"
         sizes="33vw"
         unoptimized
       />
@@ -53,24 +61,41 @@ export default function GalleryCard({ product, colors = [], isFavorite = false, 
         </button>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-1.5 pt-6">
-        <h3 className="truncate text-[11px] font-bold text-white leading-tight">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-2 pt-8">
+        {product.codigo && (
+          <p className="font-mono text-lg font-black text-white leading-none tracking-wide">
+            {product.codigo}
+          </p>
+        )}
+        {product.sizes?.length > 0 && (
+          <p className="mt-0.5 text-sm font-bold text-white/80 leading-none">
+            {product.sizes.join(" · ")}
+          </p>
+        )}
+        <h3 className="mt-1 truncate text-[10px] font-medium text-white/70 leading-tight">
           {product.nombre}
         </h3>
-        {product.codigo && (
-          <p className="font-mono text-[9px] text-white/50">{product.codigo}</p>
-        )}
         {colors.length > 0 && (
-          <div className="mt-0.5 flex gap-0.5">
-            {colors.slice(0, 4).map((c: any, i: number) => (
-              <div
+          <div className="mt-1.5 flex gap-1">
+            {colors.slice(0, 5).map((c: any, i: number) => (
+              <button
                 key={c.id || i}
-                className="h-2.5 w-2.5 rounded-full border border-white/50"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setSelectedColor((prev) => prev === c.id ? null : c.id)
+                }}
+                className={`h-4 w-4 rounded-full border-2 transition-all ${
+                  selectedColor === c.id
+                    ? "scale-125 border-white shadow-[0_0_6px_rgba(255,255,255,0.6)]"
+                    : "border-white/60 hover:scale-110"
+                }`}
                 style={{ backgroundColor: c.hex || "#808080" }}
+                title={c.color}
               />
             ))}
-            {colors.length > 4 && (
-              <span className="text-[8px] text-white/60">+{colors.length - 4}</span>
+            {colors.length > 5 && (
+              <span className="text-[8px] text-white/60 leading-none self-center">+{colors.length - 5}</span>
             )}
           </div>
         )}

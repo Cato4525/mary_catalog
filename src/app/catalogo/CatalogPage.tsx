@@ -54,11 +54,15 @@ export default function CatalogPage() {
         : []
 
       const imagesByProduct: Record<number, string[]> = {}
+      const imagesByColor: Record<number, Record<number, string[]>> = {}
       for (const img of (allImages as any[])) {
         const variant = (allVariants as any[]).find((v: any) => v.id === img.variant_id)
         if (!variant) continue
         if (!imagesByProduct[variant.product_id]) imagesByProduct[variant.product_id] = []
         imagesByProduct[variant.product_id].push(img.url)
+        if (!imagesByColor[variant.product_id]) imagesByColor[variant.product_id] = {}
+        if (!imagesByColor[variant.product_id][variant.color_id]) imagesByColor[variant.product_id][variant.color_id] = []
+        imagesByColor[variant.product_id][variant.color_id].push(img.url)
       }
 
       const variantsByProduct: Record<number, any[]> = {}
@@ -82,6 +86,7 @@ export default function CatalogPage() {
           ...p,
           imagen_url: firstImage || PLACEHOLDER,
           images: allProductImages.length > 0 ? allProductImages : [firstImage || PLACEHOLDER],
+          imagesByColor: imagesByColor[p.id] || {},
           first_variant_id: variants[0]?.id || null,
           colors: variants.map((v: any) => ({
             id: v.color_id,
