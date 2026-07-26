@@ -104,7 +104,7 @@ export default function ProductDetail({
             ))}
           </div>
         )}
-        <ProductGallery images={displayImages} productName={product.nombre} onImageChange={handleImageChange} />
+        <ProductGallery images={displayImages} productName={product.nombre} productCode={product.codigo} onImageChange={handleImageChange} />
       </div>
 
       <div className="space-y-4">

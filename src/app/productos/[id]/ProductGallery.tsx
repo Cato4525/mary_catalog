@@ -6,6 +6,7 @@ import Image from "next/image"
 interface Props {
   images: string[]
   productName: string
+  productCode?: string
   onImageChange?: (index: number) => void
 }
 
@@ -35,7 +36,7 @@ function getFilename(url: string, index: number): string {
   }
 }
 
-export default function ProductGallery({ images, productName, onImageChange }: Props) {
+export default function ProductGallery({ images, productName, productCode, onImageChange }: Props) {
   const [selected, setSelected] = useState(0)
   const [downloading, setDownloading] = useState(false)
   const thumbRef = useRef<HTMLDivElement>(null)
@@ -112,6 +113,17 @@ export default function ProductGallery({ images, productName, onImageChange }: P
           sizes="(max-width: 768px) 100vw, 50vw"
           unoptimized
         />
+
+        <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 pt-8">
+          {productCode && (
+            <p className="font-mono text-2xl font-black text-white leading-none tracking-wide sm:text-3xl">
+              {productCode}
+            </p>
+          )}
+          <h2 className="mt-1 text-lg font-bold text-white leading-tight sm:text-xl">
+            {productName}
+          </h2>
+        </div>
 
         <button
           type="button"
