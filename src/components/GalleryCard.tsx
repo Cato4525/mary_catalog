@@ -67,12 +67,7 @@ export default function GalleryCard({ product, colors = [], isFavorite = false, 
             {product.codigo}
           </p>
         )}
-        {product.sizes?.length > 0 && (
-          <p className="mt-0.5 text-sm font-bold text-white/80 leading-none">
-            {product.sizes.join(" · ")}
-          </p>
-        )}
-        <h3 className="mt-1 truncate text-[10px] font-medium text-white/70 leading-tight">
+        <h3 className="mt-0.5 truncate text-[11px] font-semibold text-white leading-tight">
           {product.nombre}
         </h3>
         {colors.length > 0 && (
@@ -98,6 +93,11 @@ export default function GalleryCard({ product, colors = [], isFavorite = false, 
               <span className="text-[8px] text-white/60 leading-none self-center">+{colors.length - 5}</span>
             )}
           </div>
+        )}
+        {product.sizes?.length > 0 && (
+          <p className="mt-1 text-[10px] font-medium text-white/60 leading-none">
+            {product.sizes.join(" · ")}
+          </p>
         )}
       </div>
     </Link>
