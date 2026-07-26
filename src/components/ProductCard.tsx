@@ -205,22 +205,27 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Color circles - right side below actions */}
+        {/* Color circles - left side */}
         {colors.length > 0 && (
-          <div className="absolute right-3 bottom-36 z-10 flex flex-col items-center gap-1.5">
-            {colors.slice(0, 5).map((c: any, i: number) => (
-              <div
-                key={c.id || i}
-                title={c.color || ""}
-                className="h-5 w-5 rounded-full border-2 border-white/40 shadow-md"
-                style={{ backgroundColor: c.hex || "#808080" }}
-              />
-            ))}
-            {colors.length > 5 && (
-              <span className="text-[10px] font-bold text-white/80">
-                +{colors.length - 5}
-              </span>
-            )}
+          <div className="absolute left-3 bottom-36 z-10 flex flex-col gap-1.5">
+            <span className="text-[10px] font-semibold text-white/70 drop-shadow-md">
+              Colores disponibles
+            </span>
+            <div className="flex flex-col items-start gap-1.5">
+              {colors.slice(0, 5).map((c: any, i: number) => (
+                <div
+                  key={c.id || i}
+                  title={c.color || ""}
+                  className="h-5 w-5 rounded-full border-2 border-white/40 shadow-md"
+                  style={{ backgroundColor: c.hex || "#808080" }}
+                />
+              ))}
+              {colors.length > 5 && (
+                <span className="text-[10px] font-bold text-white/80">
+                  +{colors.length - 5}
+                </span>
+              )}
+            </div>
           </div>
         )}
 
