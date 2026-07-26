@@ -2,9 +2,10 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import ProductActions from "./ProductActions"
 import AddToCartButton from "./AddToCartButton"
+import { useCart } from "@/context/CartContext"
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
 
@@ -30,6 +31,40 @@ export default function ProductCard({
   const images: string[] = product.images || [product.imagen_url || PLACEHOLDER]
   const [currentImage, setCurrentImage] = useState(0)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const { addItem } = useCart()
+  const isVisibleRef = useRef(false)
+
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting
+      },
+      { threshold: 0.5 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const handleAddToCart = () => {
+      if (!isVisibleRef.current || !product.first_variant_id) return
+      addItem({
+        id: product.id,
+        variant_id: product.first_variant_id,
+        nombre: product.nombre,
+        color: colors[0]?.color || "",
+        categoria: product.categories?.nombre || "",
+        imagen_url: product.imagen_url || "",
+      })
+    }
+
+    window.addEventListener("bottomnav:addToCart", handleAddToCart)
+    return () => window.removeEventListener("bottomnav:addToCart", handleAddToCart)
+  }, [product, colors, addItem])
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = {
@@ -51,11 +86,8 @@ export default function ProductCard({
       touchStart.current = null
 
       if (dx < 15 && dy < 15) {
-        const x = endX - rect.left
-        if (x > width * 0.3 && x < width * 0.7) {
-          window.location.href = `/productos/${product.id}`
-          return
-        }
+        window.location.href = `/productos/${product.id}`
+        return
       }
     }
 
@@ -71,7 +103,7 @@ export default function ProductCard({
   return (
     <>
       {/* MOBILE: Full-screen TikTok style */}
-      <div className="relative h-[100dvh] w-full snap-start sm:hidden">
+      <div ref={cardRef} className="relative h-[100dvh] w-full snap-start sm:hidden">
         <div
           className="absolute inset-0"
           onTouchStart={handleTouchStart}
@@ -136,7 +168,11 @@ export default function ProductCard({
 
         {/* Action buttons - right side */}
         {onToggleFavorite && (
-          <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
+          <div
+            className="absolute right-3 top-1/2 z-10 -translate-y-1/2"
+            onClick={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
             <ProductActions
               productId={product.id}
               productName={product.nombre}
@@ -148,7 +184,11 @@ export default function ProductCard({
 
         {/* Add to cart - center */}
         {product.first_variant_id && (
-          <div className="absolute bottom-32 left-0 right-0 z-10 flex justify-center">
+          <div
+            className="absolute bottom-20 left-0 right-0 z-10 flex justify-center"
+            onClick={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+          >
             <AddToCartButton
               product={{
                 id: product.id,
@@ -165,7 +205,7 @@ export default function ProductCard({
 
         {/* Color circles - right side below actions */}
         {colors.length > 0 && (
-          <div className="absolute right-3 bottom-28 z-10 flex flex-col items-center gap-1.5">
+          <div className="absolute right-3 bottom-36 z-10 flex flex-col items-center gap-1.5">
             {colors.slice(0, 5).map((c: any, i: number) => (
               <div
                 key={c.id || i}

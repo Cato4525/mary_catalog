@@ -529,13 +529,13 @@ export default function ProductForm({ product, categories, productTypes, allColo
 
         {showNewColor && (
           <div className="mb-3 flex flex-wrap items-end gap-2 rounded-lg border border-blue-200 bg-white p-3">
-            <div>
+            <div className="min-w-[120px] flex-1 sm:flex-none">
               <label className="mb-1 block text-[10px] font-medium text-gray-500">Nombre</label>
               <input
                 type="text"
                 value={newColorName}
                 onChange={(e) => setNewColorName(e.target.value)}
-                className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-400 focus:outline-none"
+                className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-400 focus:outline-none sm:w-auto"
                 placeholder="Ej: Turquesa"
               />
             </div>
@@ -627,10 +627,10 @@ export default function ProductForm({ product, categories, productTypes, allColo
                           <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-gray-200">
                             <Image src={preview} alt="" fill className="object-cover" sizes="80px" unoptimized />
                           </div>
-                          <button
+                           <button
                             type="button"
                             onClick={() => removeColorFile(cs.colorId, idx)}
-                            className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                           >
                             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -727,7 +727,7 @@ export default function ProductForm({ product, categories, productTypes, allColo
                         <button
                           type="button"
                           onClick={() => handleDeleteEditImage(variant.id, img.id)}
-                          className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                          className="absolute -right-1.5 -top-1.5 rounded-full bg-red-500 p-0.5 text-white transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                         >
                           <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

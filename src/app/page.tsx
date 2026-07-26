@@ -129,6 +129,7 @@ export default async function Home({
             <CatalogHeader
               categories={categories as any[]}
               productTypes={productTypes as any[]}
+              colors={availableColors as any[]}
             />
           </div>
         </div>
@@ -159,6 +160,7 @@ export default async function Home({
             <CatalogHeader
               categories={categories as any[]}
               productTypes={productTypes as any[]}
+              colors={availableColors as any[]}
             />
           </div>
         </div>

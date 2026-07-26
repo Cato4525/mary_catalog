@@ -7,17 +7,20 @@ import type { Category, ProductType } from "@/lib/types"
 export default function CatalogHeader({
   categories,
   productTypes,
+  colors = [],
 }: {
   categories: Category[]
   productTypes: ProductType[]
+  colors?: { id: number; nombre: string; codigo_hex: string }[]
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const timer = useRef<ReturnType<typeof setTimeout>>()
-  const [openFilter, setOpenFilter] = useState<"none" | "categoria" | "tipo">("none")
+  const [openFilter, setOpenFilter] = useState<"none" | "categoria" | "tipo" | "color">("none")
 
   const currentCategoria = searchParams.get("categoria") || ""
   const currentTipo = searchParams.get("tipo") || ""
+  const currentColor = searchParams.get("color") || ""
   const currentQ = searchParams.get("q") || ""
 
   const push = useCallback(
@@ -63,12 +66,24 @@ export default function CatalogHeader({
     [searchParams, push]
   )
 
-  const toggleFilter = (f: "categoria" | "tipo") => {
+  const handleColor = useCallback(
+    (id: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (id) params.set("color", id)
+      else params.delete("color")
+      setOpenFilter("none")
+      push(params)
+    },
+    [searchParams, push]
+  )
+
+  const toggleFilter = (f: "categoria" | "tipo" | "color") => {
     setOpenFilter((prev) => (prev === f ? "none" : f))
   }
 
   const activeCategoria = categories.find((c) => String(c.id) === currentCategoria)
   const activeTipo = productTypes.find((t) => String(t.id) === currentTipo)
+  const activeColor = colors.find((c) => String(c.id) === currentColor)
 
   return (
     <div className="relative">
@@ -118,6 +133,24 @@ export default function CatalogHeader({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
           </svg>
           <span className="hidden sm:inline">{activeTipo?.nombre || "Tipo"}</span>
+        </button>
+
+        <button
+          onClick={() => toggleFilter("color")}
+          className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium backdrop-blur-sm transition-all sm:px-4 sm:py-3 ${
+            currentColor
+              ? "border-primary-300 bg-primary-50/90 text-primary-700"
+              : "border-white/20 bg-white/90 text-gray-600 hover:border-gray-300 hover:bg-white sm:border-gray-200 sm:bg-gray-50"
+          }`}
+        >
+          {activeColor ? (
+            <span className="h-4 w-4 rounded-full border border-gray-300 shadow-inner" style={{ backgroundColor: activeColor.codigo_hex }} />
+          ) : (
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          )}
+          <span className="hidden sm:inline">{activeColor?.nombre || "Color"}</span>
         </button>
       </div>
 
@@ -173,7 +206,34 @@ export default function CatalogHeader({
         </div>
       )}
 
-      {(openFilter === "categoria" || openFilter === "tipo") && (
+      {openFilter === "color" && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[50vh] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+          <button
+            onClick={() => handleColor("")}
+            className={`w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+              !currentColor ? "bg-primary-50 text-primary-700" : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            Todos los colores
+          </button>
+          {colors.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => handleColor(String(c.id))}
+              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                currentColor === String(c.id)
+                  ? "bg-primary-50 text-primary-700"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              <span className="h-4 w-4 shrink-0 rounded-full border border-gray-300 shadow-inner" style={{ backgroundColor: c.codigo_hex }} />
+              {c.nombre}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {(openFilter === "categoria" || openFilter === "tipo" || openFilter === "color") && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => setOpenFilter("none")}

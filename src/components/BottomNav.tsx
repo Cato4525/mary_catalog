@@ -19,6 +19,11 @@ export default function BottomNav() {
     setCartOpen(true)
   }
 
+  const handleAddToCartClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    window.dispatchEvent(new CustomEvent("bottomnav:addToCart"))
+  }
+
   const handleContactoClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (pathname === "/") {
@@ -28,8 +33,7 @@ export default function BottomNav() {
     }
   }
 
-  const isHome = pathname === "/" && !searchParams?.has("search")
-  const isSearch = pathname === "/" && searchParams?.has("search")
+  const isHome = pathname === "/"
   const isContacto = false
 
   return (
@@ -40,7 +44,7 @@ export default function BottomNav() {
           <Link
             href="/"
             className={`flex flex-1 flex-col items-center gap-0.5 py-1 transition-colors ${
-              isHome ? "text-primary-600" : "text-gray-400"
+              isHome && !searchParams?.has("favorites") ? "text-primary-600" : "text-gray-400"
             }`}
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,18 +53,34 @@ export default function BottomNav() {
             <span className="text-[10px] font-medium leading-none">Inicio</span>
           </Link>
 
-          {/* Buscar */}
+          {/* Catálogo */}
           <Link
-            href="/?search=1"
+            href="/"
             className={`flex flex-1 flex-col items-center gap-0.5 py-1 transition-colors ${
-              isSearch ? "text-primary-600" : "text-gray-400"
+              isHome && !searchParams?.has("favorites") ? "text-primary-600" : "text-gray-400"
             }`}
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
-            <span className="text-[10px] font-medium leading-none">Buscar</span>
+            <span className="text-[10px] font-medium leading-none">Catálogo</span>
           </Link>
+
+          {/* Agregar al carrito */}
+          <button
+            onClick={handleAddToCartClick}
+            className="flex flex-1 flex-col items-center gap-0.5 py-1 text-gray-400 transition-colors active:text-primary-600"
+          >
+            <div className="relative flex h-8 w-8 items-center justify-center">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <svg className="absolute -bottom-0.5 -right-0.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
+              </svg>
+            </div>
+            <span className="text-[10px] font-medium leading-none">Agregar</span>
+          </button>
 
           {/* Carrito - Botón central elevado */}
           <div className="flex flex-1 justify-center -mt-5">
@@ -92,9 +112,6 @@ export default function BottomNav() {
             </svg>
             <span className="text-[10px] font-medium leading-none">Contacto</span>
           </Link>
-
-          {/* Placeholder para simetría */}
-          <div className="flex flex-1" />
         </div>
       </nav>
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
