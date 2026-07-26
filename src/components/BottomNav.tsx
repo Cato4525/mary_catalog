@@ -55,9 +55,9 @@ export default function BottomNav() {
 
           {/* Catálogo */}
           <Link
-            href="/"
+            href="/catalogo"
             className={`flex flex-1 flex-col items-center gap-0.5 py-1 transition-colors ${
-              isHome && !searchParams?.has("favorites") ? "text-primary-600" : "text-gray-400"
+              pathname === "/catalogo" ? "text-primary-600" : "text-gray-400"
             }`}
           >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

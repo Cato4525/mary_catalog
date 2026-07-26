@@ -43,7 +43,6 @@ export async function PATCH(
         tipo_id,
         disponible,
         destacado,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", productId)
 
