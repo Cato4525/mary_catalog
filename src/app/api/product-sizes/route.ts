@@ -56,6 +56,7 @@ export async function POST(request: Request) {
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath("/admin/productos")
     return NextResponse.json({ ok: true })
   } catch (err) {
@@ -89,6 +90,7 @@ export async function PATCH(request: Request) {
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     return NextResponse.json({ ok: true })
   } catch (err) {
     return NextResponse.json(
@@ -122,6 +124,7 @@ export async function DELETE(request: Request) {
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     return NextResponse.json({ ok: true })
   } catch (err) {
     return NextResponse.json(

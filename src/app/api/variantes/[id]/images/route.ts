@@ -59,6 +59,7 @@ export async function POST(
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath(`/admin/productos/${existing.product_id}/variantes`)
     return NextResponse.json({ urls: uploadedUrls })
   } catch (err) {
@@ -112,6 +113,7 @@ export async function DELETE(request: Request) {
       .single()
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     if (variant) revalidatePath(`/admin/productos/${variant.product_id}/variantes`)
     return NextResponse.json({ ok: true })
   } catch (err) {

@@ -108,7 +108,7 @@ export default function ProductCard({
             className="object-cover"
             sizes="100vw"
             unoptimized
-            priority
+            priority={index === 0 && total > 0}
           />
         </div>
 

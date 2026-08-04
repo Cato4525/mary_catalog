@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       .single()
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     if (first) revalidatePath(`/admin/productos/${first.product_id}/variantes`)
     return NextResponse.json({ ok: true })
   } catch (err) {

@@ -111,6 +111,7 @@ export async function POST(request: Request) {
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath("/admin/productos")
     return NextResponse.json(product)
   } catch (err) {

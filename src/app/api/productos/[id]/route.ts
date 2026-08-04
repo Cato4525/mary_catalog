@@ -64,8 +64,10 @@ export async function PATCH(
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath("/admin/productos")
     revalidatePath(`/admin/productos/${productId}`)
+    revalidatePath(`/productos/${productId}`)
     return NextResponse.json({ id: productId })
   } catch (err) {
     return NextResponse.json(

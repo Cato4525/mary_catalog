@@ -5,15 +5,13 @@ import ProductGrid from "@/components/ProductGrid"
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='710' fill='%23f3f4f6'%3E%3Crect width='400' height='710'/%3E%3C/svg%3E"
 
-export const dynamic = "force-dynamic"
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 async function api(url: string) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${url}`, {
     headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
-    cache: "no-store",
+    next: { revalidate: 60 },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`)
   return res.json()
@@ -38,18 +36,19 @@ export default async function Home({
 
   const productIds = (products as any[]).map((p: any) => p.id)
 
-  const allVariants = productIds.length
-    ? await api(`product_variants?select=id,product_id,color_id,disponible&product_id=in.(${productIds.join(",")})`)
-    : []
+  const [allVariants, allSizes] = await Promise.all([
+    productIds.length
+      ? api(`product_variants?select=id,product_id,color_id,disponible&product_id=in.(${productIds.join(",")})`)
+      : [],
+    productIds.length
+      ? api(`product_sizes?select=sizes(nombre),product_id&product_id=in.(${productIds.join(",")})`)
+      : [],
+  ])
 
   const variantIds = (allVariants as any[]).map((v: any) => v.id)
 
   const allImages = variantIds.length
     ? await api(`product_images?select=variant_id,url,sort_order&variant_id=in.(${variantIds.join(",")})`)
-    : []
-
-  const allSizes = productIds.length
-    ? await api(`product_sizes?select=sizes(nombre),product_id&product_id=in.(${productIds.join(",")})`)
     : []
 
   const imagesByProduct: Record<number, string[]> = {}

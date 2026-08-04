@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     return NextResponse.json(data)
   } catch (err) {
     return NextResponse.json(

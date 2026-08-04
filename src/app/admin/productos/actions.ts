@@ -44,6 +44,7 @@ export async function toggleDisponible(formData: FormData) {
 
   revalidatePath("/admin/productos")
   revalidatePath("/")
+  revalidatePath("/catalogo")
 }
 
 export async function checkExpiredProducts() {

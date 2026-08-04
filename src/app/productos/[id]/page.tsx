@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import ProductDetail from "./ProductDetail"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -9,7 +9,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 async function api(url: string) {
   const res = await fetch(`${supabaseUrl}/rest/v1/${url}`, {
     headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` },
-    cache: "no-store",
+    next: { revalidate: 60 },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`)
   return res.json()

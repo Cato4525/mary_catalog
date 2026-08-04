@@ -72,6 +72,7 @@ export async function PATCH(
     const productId = variant?.product_id
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath("/admin/productos")
     if (productId) revalidatePath(`/admin/productos/${productId}/variantes`)
     return NextResponse.json({ id: variantId })
@@ -116,6 +117,7 @@ export async function DELETE(
 
     const productId = variant?.product_id
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath("/admin/productos")
     if (productId) revalidatePath(`/admin/productos/${productId}/variantes`)
     return NextResponse.json({ ok: true })

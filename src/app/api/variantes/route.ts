@@ -54,6 +54,7 @@ export async function POST(request: Request) {
     }
 
     revalidatePath("/")
+    revalidatePath("/catalogo")
     revalidatePath("/admin/productos")
     revalidatePath(`/admin/productos/${product_id}/variantes`)
     return NextResponse.json(variant)
