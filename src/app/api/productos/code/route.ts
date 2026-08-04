@@ -13,15 +13,12 @@ export async function GET(request: Request) {
     const { data } = await supabaseAdmin
       .from("products")
       .select("codigo")
-      .like("codigo", `${prefix}-%`)
-      .order("codigo", { ascending: false })
 
     let nextNum = 1
-    if (data && data.length > 0) {
-      const lastCode = data[0].codigo
-      const match = lastCode.match(/-(\d+)$/)
+    for (const row of data || []) {
+      const match = String(row.codigo).match(/-(\d+)$/)
       if (match) {
-        nextNum = parseInt(match[1], 10) + 1
+        nextNum = Math.max(nextNum, parseInt(match[1], 10) + 1)
       }
     }
 
